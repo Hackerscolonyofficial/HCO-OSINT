@@ -1,101 +1,68 @@
-# HCO-OSINT  
+HCO-OSINT - Advanced OSINT Tool (Educational) 🚀🔍
 
-> **Advanced OSINT Framework for Termux & Linux**  
-> Code by **Azhar (Hackers Colony Official)**  
+YouTube: https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya
+Telegram: https://t.me/hackersColony
+Instagram: https://www.instagram.com/hackers_colony_official
 
-![Hackers Colony](https://img.shields.io/badge/Hackers-Colony-red?style=for-the-badge)  
-![YouTube](https://img.shields.io/badge/Subscribe-YouTube-red?style=for-the-badge&logo=youtube)  
-![Telegram](https://img.shields.io/badge/Join-Telegram-blue?style=for-the-badge&logo=telegram)  
-![Discord](https://img.shields.io/badge/Join-Discord-purple?style=for-the-badge&logo=discord)  
+HCO-OSINT is an advanced educational OSINT tool by Azhar (Hackers Colony). It is designed for learning, awareness, and demonstration purposes only. Gather info about phone numbers, IPs, domains, emails, usernames, and more with Quick and Advanced modes. It’s colorful, animated, and works on Termux (Android) 📱 & Linux 🐧.
 
----
+Features:
+1. Phone Number Lookup – Validity, carrier, timezone, number type, country
+2. IP Lookup – Geolocation, ISP, city, country, reverse DNS
+3. Domain Lookup – Domain to IP resolution, extra IPs, optional DNS info
+4. Email Lookup – Format validation, domain, MX check
+5. Username Lookup – Multiple social platforms availability, advanced extra checks
+6. Shodan-like Quick Scan – Common ports + extra ports in Advanced Mode
+7. HTTP Headers Grabber – Server headers, security headers, cookies
+8. Port Scanner – Common ports + extra ports in Advanced Mode
+9. Unlock System – Realistic subscription message with YouTube redirect and neon banner
 
-## 📌 Features
-HCO-OSINT provides **8 advanced OSINT modules** without requiring any paid API keys:  
+Each feature includes educational popups, animated countdowns, blinking dots, and colorful tables for a realistic hacking simulation.
 
-1. **Phone Number Lookup** – carrier, region, validity, type  
-2. **IP Lookup** – ISP, ASN, country, city, reverse DNS  
-3. **Email Lookup** – MX records, leaks check, validation  
-4. **Username Lookup** – search across popular social platforms  
-5. **Domain Lookup** – registrar, DNS, subdomains, SSL info  
-6. **WiFi & Geo OSINT** – check BSSID/SSID info from open sources  
-7. **Device Fingerprint** – extract headers, OS, browser details  
-8. **Shodan Scan (No API)** – open ports, services & banners (direct search without requiring API key)  
+Installation & Setup:
 
----
-
-## 🔓 Unlock System
-This tool is **not free**.  
-When you run it:  
-
-1. Countdown starts: `8,7,6,5,4,3,2,1`  
-2. You will be redirected to Hackers Colony YouTube channel  
-3. After subscribing, press **Enter** to continue  
-4. You’ll see:  
-   ```
-   ██████████████████████████████████
-   HCO-OSINT by Azhar
-   ██████████████████████████████████
-   ```
-   (Displayed in **bold neon green text inside a red box**, no ASCII art)  
-
----
-
-## ⚡ Installation (Termux / Linux)
-Copy & paste the full setup:  
-
-```bash
-# Clone repo
-git clone https://github.com/HackersColonyOfficial/HCO-OSINT.git
-cd HCO-OSINT
-
-# Auto dependency install
-chmod +x install.sh
-./install.sh
-
-# Run tool
-python HCO-OSINT.py
-```
-
----
-
-## 📜 install.sh (Auto Installer)
-```bash
-#!/bin/bash
-echo "[*] Installing dependencies..."
+Termux (Android) 📱
 pkg update -y && pkg upgrade -y
-pkg install -y python git curl
-pip install --upgrade pip
-pip install requests beautifulsoup4 dnspython tabulate colorama shodan
+pkg install python -y
+git clone https://github.com/YourUsername/HCO-OSINT.git
+cd HCO-OSINT
+python3 HCO-OSINT.py
 
-echo "[*] Installation complete! Run with: python HCO-OSINT.py"
-```
+Linux 🐧
+sudo apt update && sudo apt upgrade -y   # Debian/Ubuntu
+sudo dnf update -y                       # Fedora
+sudo pacman -Syu                         # Arch
+sudo apt install python3 git -y          # Ensure Python3 & Git installed
+git clone https://github.com/YourUsername/HCO-OSINT.git
+cd HCO-OSINT
+python3 HCO-OSINT.py
 
----
+The tool will auto-install missing dependencies (colorama, tabulate, phonenumbers, requests) if needed.
 
-## 📸 Screenshot
-(Coming soon after first release demo)
+How it Works:
+1. Run python3 HCO-OSINT.py
+2. Unlock tool via subscription message and YouTube redirect
+3. Press ENTER after subscribing 🔔
+4. Select one of the 8 features in the colorful menu
+5. Choose Quick or Advanced mode for deeper scanning
+6. Results appear in colorful, formatted tables with educational popups
 
----
+Disclaimer:
+- For educational purposes only!
+- Do NOT use for illegal activities 🚫
+- Always get proper consent before scanning devices or services
+- Author is not responsible for misuse
 
-## ⚠️ Disclaimer
-This project is for **educational & awareness purposes only**.  
-We are **not responsible** for misuse or illegal activities.  
+Social & Support:
+YouTube: https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya
+Telegram: https://t.me/hackersColony
+Instagram: https://www.instagram.com/hackers_colony_official
 
----
+Credits:
+Code by Azhar – Hackers Colony. Educational animations, neon banners, advanced OSINT features, colorful terminal interface.
 
-## 🌐 Official Channels
-- 🌍 [Website](https://hackerscolonyofficial.blogspot.com/?m=1)  
-- 📺 [YouTube](https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya)  
-- 💬 [Telegram](https://t.me/hackersColony)  
-- 🎮 [Discord](https://discord.gg/Xpq9nCGD)  
-- 📷 [Instagram](https://www.instagram.com/hackers_colony_official)  
+Final Note:
+“Knowledge is power, but ethical use of knowledge is wisdom.” HCO-OSINT is built to teach, demonstrate, and improve cybersecurity awareness safely.
 
----
-
-### 💡 Quote
-> *"The quieter you become, the more you are able to hear."*  
-> — Hackers Colony Official
-
-© 2025 Azhar (Hackers Colony). All rights reserved.
-This tool is proprietary — do not copy, share, or redistribute without permission.
+❗ Note: Copying this tool or README without permission is discouraged ⚡
+❗ This README and tool are meant for educational awareness only 📚
