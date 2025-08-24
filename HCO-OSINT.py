@@ -7,12 +7,13 @@ By Azhar (Hackers Colony)
 import os
 import sys
 import time
-import webbrowser
 import socket
 import requests
 import phonenumbers
 from phonenumbers import geocoder, carrier, timezone
 from random import choice
+import platform
+import subprocess
 
 # Auto-install dependencies
 try:
@@ -46,13 +47,28 @@ def blinking_dots(duration=3):
             time.sleep(0.5)
     print(" " * 50, end="\r")
 
+# --- YouTube Redirect Compatible with Termux & Linux ---
+def open_youtube(url):
+    system_platform = platform.system()
+    try:
+        if system_platform == "Linux":
+            subprocess.run(["xdg-open", url])
+        elif system_platform == "Darwin":  # macOS
+            subprocess.run(["open", url])
+        elif system_platform == "Windows":
+            os.startfile(url)
+        else:  # Termux or unknown
+            os.system(f"termux-open-url {url} || am start -a android.intent.action.VIEW -d {url} || python3 -m webbrowser {url}")
+    except:
+        print(Fore.RED + "Failed to open browser. Please manually visit the link: " + url)
+
 def unlock_tool():
     print(Fore.YELLOW + Style.BRIGHT + "\n🔒 HCO OSINT Lock System")
     print(Fore.CYAN + "To unlock the tool, we will redirect you to our YouTube channel.")
     print(Fore.CYAN + "Please subscribe and click the 🔔 bell icon to activate the tool!")
     animated_countdown(8, "Redirecting in")
     print(Fore.GREEN + "Opening YouTube...")
-    webbrowser.open(https://youtube.com/@hackers_colony_tech?si=hub1VPXxkEsEeesl)
+    open_youtube(YOUTUBE_LINK)
     input(Fore.MAGENTA + "\nAfter subscribing and clicking the bell, press ENTER to continue...")
 
 def show_banner():
