@@ -37,7 +37,7 @@ When you run it:
    HCO-OSINT by Azhar
    ██████████████████████████████████
    ```
-   (Displayed in **bold green text inside a red box**, no ASCII art)  
+   (Displayed in **bold neon green text inside a red box**, no ASCII art)  
 
 ---
 
@@ -96,3 +96,6 @@ We are **not responsible** for misuse or illegal activities.
 ### 💡 Quote
 > *"The quieter you become, the more you are able to hear."*  
 > — Hackers Colony Official
+
+© 2025 Azhar (Hackers Colony). All rights reserved.
+This tool is proprietary — do not copy, share, or redistribute without permission.
