@@ -52,7 +52,7 @@ def unlock_tool():
     print(Fore.CYAN + "Please subscribe and click the 🔔 bell icon to activate the tool!")
     animated_countdown(8, "Redirecting in")
     print(Fore.GREEN + "Opening YouTube...")
-    webbrowser.open(YOUTUBE_LINK)
+    webbrowser.open(https://youtube.com/@hackers_colony_tech?si=hub1VPXxkEsEeesl)
     input(Fore.MAGENTA + "\nAfter subscribing and clicking the bell, press ENTER to continue...")
 
 def show_banner():
