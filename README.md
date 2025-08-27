@@ -1,90 +1,103 @@
-════════════════════════════════════════════════
-🚀🔍 HCO-OSINT - Advanced OSINT Tool (Educational) 🔍🚀
-════════════════════════════════════════════════
+# ╔════════════════════════════════════════════════════════╗
+# 🚀🔍 HCO-OSINT – Advanced OSINT Tool (Educational) 🔍🚀
+# ╚════════════════════════════════════════════════════════╝
 
-📺 YouTube : https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya
-💬 Telegram: https://t.me/hackersColony
-📸 Instagram: https://www.instagram.com/hackers_colony_official
+### By **Azhar – Hackers Colony**  
+📱 Termux & 🐧 Linux compatible  
 
-HCO-OSINT is an **advanced educational OSINT tool** by Azhar (Hackers Colony). 
-Designed for **learning, awareness, and demonstration purposes only**.  
-Gather info about **phone numbers, IPs, domains, emails, usernames**, and more with **Quick & Advanced modes**.  
-Works on **Termux (Android) 📱 & Linux 🐧**.
+🌐 **Social Links**  
+📺 YouTube: [Hackers Colony Tech](https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya)  
+💬 Telegram: [HackersColony](https://t.me/hackersColony)  
+📸 Instagram: [hackers_colony_official](https://www.instagram.com/hackers_colony_official)  
 
-════════════════════════════════════════════════
-⚡ Features
-════════════════════════════════════════════════
-1️⃣ Phone Number Lookup – Validity, carrier, timezone, number type, country
-2️⃣ IP Lookup – Geolocation, ISP, city, country, reverse DNS
-3️⃣ Domain Lookup – Domain to IP resolution, extra IPs, optional DNS info
-4️⃣ Email Lookup – Format validation, domain, MX check
-5️⃣ Username Lookup – Multiple social platforms availability, advanced extra checks
-6️⃣ Shodan-like Quick Scan – Common ports + extra ports in Advanced Mode
-7️⃣ HTTP Headers Grabber – Server headers, security headers, cookies
-8️⃣ Port Scanner – Common ports + extra ports in Advanced Mode
-9️⃣ Unlock System – Subscription message with YouTube redirect and neon banner
+---
 
-Each feature includes **educational popups, animated countdowns, blinking dots**, and **colorful tables** for a realistic hacking simulation.
+## 🛠 About HCO-OSINT
+HCO-OSINT is an **educational OSINT tool** for **learning, awareness, and demonstration purposes only**.  
+Gather info about:  
+☎️ Phone Numbers | 🌐 IPs | 🏷 Domains | 📧 Emails | 👤 Usernames  
+Quick & Advanced modes for deep scanning. Compatible with Termux 📱 & Linux 🐧.  
 
-════════════════════════════════════════════════
-🛠 Installation & Setup
-════════════════════════════════════════════════
+---
 
-📱 Termux (Android):
-pkg update -y && pkg upgrade -y
-pkg install python -y
-git clone https://github.com/YourUsername/HCO-OSINT.git
-cd HCO-OSINT
-python3 HCO-OSINT.py
+## ⚡ Features
+1️⃣ **Phone Number Lookup** – Validity, carrier, timezone, type, country  
+2️⃣ **IP Lookup** – Geolocation, ISP, city, country, reverse DNS  
+3️⃣ **Domain Lookup** – Domain → IP, extra IPs, optional DNS info  
+4️⃣ **Email Lookup** – Format validation, domain, MX check  
+5️⃣ **Username Lookup** – Social platform availability, advanced checks  
+6️⃣ **Shodan-like Quick Scan** – Common + extra ports in Advanced Mode  
+7️⃣ **HTTP Headers Grabber** – Server headers, security headers, cookies  
+8️⃣ **Port Scanner** – Common + extra ports in Advanced Mode  
 
-🐧 Linux:
-sudo apt update && sudo apt upgrade -y   # Debian/Ubuntu
-sudo dnf update -y                       # Fedora
-sudo pacman -Syu                         # Arch
-sudo apt install python3 git -y          # Ensure Python3 & Git installed
-git clone https://github.com/YourUsername/HCO-OSINT.git
-cd HCO-OSINT
-python3 HCO-OSINT.py
+✨ Includes: educational popups, animated countdowns, blinking dots, colorful tables, realistic hacking simulation  
 
-> The tool auto-installs missing dependencies (colorama, tabulate, phonenumbers, requests).
+---
 
-════════════════════════════════════════════════
-🚀 How it Works
-════════════════════════════════════════════════
-1️⃣ Run: python3 HCO-OSINT.py
-2️⃣ Unlock tool via subscription message & YouTube redirect
-3️⃣ Press ENTER after subscribing 🔔
-4️⃣ Select one of the 8 features in the colorful menu
-5️⃣ Choose Quick or Advanced mode for deeper scanning
-6️⃣ Results appear in **colorful, formatted tables** with educational popups
+## 🛠 Installation & Setup
+### 📱 Termux (Android)
+pkg update -y && pkg upgrade -y  
+pkg install python -y  
+git clone https://github.com/YourUsername/HCO-OSINT.git  
+cd HCO-OSINT  
+python3 HCO-OSINT.py  
 
-════════════════════════════════════════════════
-⚠️ Disclaimer
-════════════════════════════════════════════════
-- For educational purposes only!
-- Do NOT use for illegal activities 🚫
-- Always get proper consent before scanning devices/services
-- Author is not responsible for misuse
+### 🐧 Linux
+**Debian/Ubuntu**  
+sudo apt update && sudo apt upgrade -y  
+sudo apt install python3 git -y  
 
-════════════════════════════════════════════════
-💻 Social & Support
-════════════════════════════════════════════════
-📺 YouTube : https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya
-💬 Telegram: https://t.me/hackersColony
-📸 Instagram: https://www.instagram.com/hackers_colony_official
+**Fedora**  
+sudo dnf update -y  
+sudo dnf install python3 git -y  
 
-════════════════════════════════════════════════
-✨ Credits
-════════════════════════════════════════════════
-Code by Azhar – Hackers Colony  
-Educational animations, neon banners, advanced OSINT features, colorful terminal interface
+**Arch**  
+sudo pacman -Syu  
+sudo pacman -S python git  
 
-════════════════════════════════════════════════
-💬 Final Note
-════════════════════════════════════════════════
+git clone https://github.com/YourUsername/HCO-OSINT.git  
+cd HCO-OSINT  
+python3 HCO-OSINT.py  
+
+> ✅ Auto-installs missing dependencies: colorama, tabulate, phonenumbers, requests  
+
+---
+
+## 🚀 How it Works
+1️⃣ Run: python3 HCO-OSINT.py  
+2️⃣ Unlock via subscription & YouTube redirect 🔔  
+3️⃣ Press ENTER after subscribing  
+4️⃣ Select feature from colorful menu  
+5️⃣ Choose Quick / Advanced mode  
+6️⃣ Results appear in formatted, colorful tables with popups  
+
+---
+
+## ⚠️ Disclaimer
+⚡ For educational purposes only  
+🚫 Do NOT use for illegal activities  
+✅ Always obtain proper consent  
+⚠️ Author not responsible for misuse  
+
+---
+
+## 💻 Social & Support
+📺 YouTube: [Hackers Colony Tech](https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya)  
+💬 Telegram: [HackersColony](https://t.me/hackersColony)  
+📸 Instagram: [hackers_colony_official](https://www.instagram.com/hackers_colony_official)  
+
+---
+
+## ✨ Credits
+💻 Code: Azhar – Hackers Colony  
+🎨 Features: Educational animations, neon banners, advanced OSINT  
+🖥 Interface: Colorful, interactive terminal  
+
+---
+
+## 💬 Final Note
 “Knowledge is power, but ethical use of knowledge is wisdom.”  
-HCO-OSINT teaches, demonstrates, and improves **cybersecurity awareness** safely.
+HCO-OSINT teaches, demonstrates, and improves cybersecurity awareness safely  
 
-❗ Copying this tool or README without permission is discouraged ⚡  
+❗ Copying this tool or README without permission is discouraged  
 ❗ For educational awareness only 📚
-════════════════════════════════════════════════
