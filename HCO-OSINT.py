@@ -44,7 +44,7 @@ def unlock_flow():
 def show_title():
     clear()
     print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "              H C O   O S I N T")
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "              H C O   O S I N T
     print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
     print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "           by Azhar (Hackers Colony)")
     print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
