@@ -212,3 +212,27 @@ def interactive():
         elif choice=="8":
             if not PIL_AVAILABLE: print(Fore.RED+"Pillow not installed"); continue
             path=input("Image path: "); last_result=extract_exif(path); pretty_print(last_result)
+        elif choice=="s":
+            if last_result:
+                fname=input("Filename (without extension): ") or "result"
+                path=save_json(fname, last_result)
+                print(Fore.GREEN+f"Saved to {path}")
+            else:
+                print(Fore.RED+"No result to save")
+        elif choice=="q":
+            print(Fore.GREEN+"Goodbye!")
+            break
+        else:
+            print(Fore.RED+"Invalid choice")
+
+# ---------------- Main execution ----------------
+if __name__ == "__main__":
+    try:
+        unlock_flow()
+        interactive()
+    except KeyboardInterrupt:
+        print(Fore.RED + "\nOperation cancelled by user. Exiting...")
+        sys.exit(0)
+    except Exception as e:
+        print(Fore.RED + f"\nUnexpected error: {e}")
+        sys.exit(1)
