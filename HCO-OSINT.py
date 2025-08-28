@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-HCO-OSINT.py — Advanced single-file OSINT toolkit (no API keys required)
+HCO-OSINT.py — Advanced single-file OSINT toolkit
 By Azhar (Hackers Colony)
 Termux-ready with YouTube unlock flow
 """
@@ -16,7 +16,6 @@ import dns.resolver
 import whois as pywhois
 from bs4 import BeautifulSoup
 
-# Optional Pillow for EXIF
 try:
     from PIL import Image
     from PIL.ExifTags import TAGS
@@ -40,7 +39,7 @@ def save_json(name,obj):
 def pretty_print(obj): print(json.dumps(obj,indent=2,ensure_ascii=False))
 def clear(): os.system("clear")
 
-# ---------------- Unlock flow (Termux-ready) ----------------
+# ---------------- Unlock flow (Termux) ----------------
 def unlock_flow():
     clear()
     print(Fore.CYAN+"🔒 Tool locked. Subscribe to unlock.")
@@ -112,7 +111,6 @@ def phone_info(number):
     except Exception as e: out["error"]=str(e)
     return out
 
-# ---------------- Username checker ----------------
 USERNAME_SITES=[
 ("Twitter","https://twitter.com/{}"),
 ("Instagram","https://www.instagram.com/{}"),
@@ -142,7 +140,6 @@ def username_check(uname,sites=None,workers=12,delay=RATE_DELAY):
             results.append(fut.result()); time.sleep(delay)
     return {"query":uname,"results":results,"timestamp":nowstamp()}
 
-# ---------------- Subdomains ----------------
 def crtsh_subdomains(domain):
     out={"query":domain,"timestamp":nowstamp()}
     try:
@@ -157,7 +154,6 @@ def crtsh_subdomains(domain):
     except Exception as e: out["error"]=str(e)
     return out
 
-# ---------------- URL & sitemap ----------------
 def expand_url(url):
     out={"original":url,"timestamp":nowstamp()}
     try:
@@ -176,7 +172,6 @@ def expand_url(url):
     except Exception as e: out["error"]=str(e)
     return out
 
-# ---------------- EXIF ----------------
 def extract_exif(path):
     if not PIL_AVAILABLE: return {"error":"Pillow not installed"}
     if not os.path.exists(path): return {"error":"file not found"}
@@ -187,7 +182,6 @@ def extract_exif(path):
         return {"file":path,"exif":exif,"timestamp":nowstamp()}
     except Exception as e: return {"error":str(e)}
 
-# ---------------- CLI ----------------
 def show_menu():
     print()
     print(Fore.CYAN+"1) IP lookup")
@@ -206,11 +200,10 @@ def interactive():
     show_title()
     print(Fore.YELLOW+"⚠️  Use ethically. Do NOT target systems without permission.")
     while True:
-        show_menu(); choice=input(Fore.MAGENTA+"Choice: ").strip().lower()
+        show_menu()
+        choice=input(Fore.MAGENTA+"Choice: ").strip().lower()
         if choice=="1": tgt=input("IP/host: "); last_result=ip_info(tgt); pretty_print(last_result)
         elif choice=="2": dom=input("Domain: "); last_result=whois_and_dns(dom); pretty_print(last_result)
         elif choice=="3": em=input("Email: "); last_result=email_info(em); pretty_print(last_result)
         elif choice=="4": ph=input("Phone (+country): "); last_result=phone_info(ph); pretty_print(last_result)
-        elif choice=="5": uname=input("Username: "); last_result=username_check(uname); pretty_print(last_result)
-        elif choice=="6": dom=input("Domain: "); last_result=crtsh_subdomains(dom); pretty_print(last_result)
-        elif choice=="7": u=input("URL: "); last_result=expand_url(u);
+        elif choice=="5": uname=input("Username: "); last_result=username_check(uname);
