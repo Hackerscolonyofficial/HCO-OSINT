@@ -112,7 +112,7 @@ def phone_info(number):
     except Exception as e: out["error"]=str(e)
     return out
 
-# ---------------- Username checker (demo list) ----------------
+# ---------------- Username checker (demo) ----------------
 USERNAME_SITES=[
 ("Twitter","https://twitter.com/{}"),
 ("Instagram","https://www.instagram.com/{}"),
@@ -121,11 +121,6 @@ USERNAME_SITES=[
 ("YouTube","https://www.youtube.com/@{}"),
 ("TikTok","https://www.tiktok.com/@{}"),
 ("LinkedIn","https://www.linkedin.com/in/{}"),
-("Pinterest","https://www.pinterest.com/{}"),
-("Steam","https://steamcommunity.com/id/{}"),
-("Twitch","https://www.twitch.tv/{}"),
-("Snapchat","https://www.snapchat.com/add/{}"),
-("Medium","https://medium.com/@{}"),
 ]
 
 def _check_profile(session,site_name,pattern,uname):
@@ -147,7 +142,7 @@ def username_check(uname,sites=None,workers=12,delay=RATE_DELAY):
             results.append(fut.result()); time.sleep(delay)
     return {"query":uname,"results":results,"timestamp":nowstamp()}
 
-# ---------------- Subdomain discovery ----------------
+# ---------------- Subdomains ----------------
 def crtsh_subdomains(domain):
     out={"query":domain,"timestamp":nowstamp()}
     try:
@@ -199,10 +194,10 @@ def show_menu():
     print(Fore.CYAN+"2) WHOIS & DNS lookup")
     print(Fore.CYAN+"3) Email check")
     print(Fore.CYAN+"4) Phone parse")
-    print(Fore.CYAN+"5) Username checks (large list)")
-    print(Fore.CYAN+"6) Subdomain discovery (crt.sh)")
+    print(Fore.CYAN+"5) Username checks")
+    print(Fore.CYAN+"6) Subdomain discovery")
     print(Fore.CYAN+"7) URL expand & sitemap")
-    print(Fore.CYAN+"8) EXIF metadata from local image")
+    print(Fore.CYAN+"8) EXIF metadata from image")
     print(Fore.YELLOW+"s) Save last result")
     print(Fore.RED+"q) Quit\n")
 
@@ -214,4 +209,23 @@ def interactive():
         show_menu(); choice=input(Fore.MAGENTA+"Choice: ").strip().lower()
         if choice=="1": tgt=input("IP/host: "); last_result=ip_info(tgt); pretty_print(last_result)
         elif choice=="2": dom=input("Domain: "); last_result=whois_and_dns(dom); pretty_print(last_result)
-        elif choice=="3": em=input("Email: "); last_result=email
+        elif choice=="3": em=input("Email: "); last_result=email_info(em); pretty_print(last_result)
+        elif choice=="4": ph=input("Phone (+country): "); last_result=phone_info(ph); pretty_print(last_result)
+        elif choice=="5": uname=input("Username: "); last_result=username_check(uname); pretty_print(last_result)
+        elif choice=="6": dom=input("Domain: "); last_result=crtsh_subdomains(dom); pretty_print(last_result)
+        elif choice=="7": u=input("URL: "); last_result=expand_url(u); pretty_print(last_result)
+        elif choice=="8": p=input("Image path: "); last_result=extract_exif(p); pretty_print(last_result)
+        elif choice=="s":
+            if not last_result: print(Fore.YELLOW+"No result to save"); continue
+            base=input("Base filename: ").strip() or "hco_report"
+            p=save_json(base,last_result); print(Fore.GREEN+f"Saved JSON: {p}")
+        elif choice=="q": print(Fore.GREEN+"Exiting."); break
+        else: print(Fore.RED+"Invalid choice")
+
+# ---------------- Main ----------------
+if __name__ == "__main__":
+    try:
+        unlock_flow()
+        interactive()
+    except KeyboardInterrupt:
+        print("\n"+Fore.RED+"Interrupted. Exiting.")
