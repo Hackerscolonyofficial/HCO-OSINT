@@ -206,4 +206,6 @@ def interactive():
         elif choice=="2": dom=input("Domain: "); last_result=whois_and_dns(dom); pretty_print(last_result)
         elif choice=="3": em=input("Email: "); last_result=email_info(em); pretty_print(last_result)
         elif choice=="4": ph=input("Phone (+country): "); last_result=phone_info(ph); pretty_print(last_result)
-        elif choice=="5": uname=input("Username: "); last_result=username_check(uname);
+        elif choice=="5": uname=input("Username: "); last_result=username_check(uname); pretty_print(last_result)
+        elif choice=="6": dom=input("Domain: "); last_result=crtsh_subdomains(dom); pretty_print(last_result)
+        elif choice=="7": u=input("URL
