@@ -2,6 +2,7 @@
 """
 HCO-OSINT.py — Advanced single-file OSINT toolkit (no API keys required)
 By Azhar (Hackers Colony)
+Termux-ready with YouTube unlock flow
 """
 
 import os, sys, time, json, re, socket, concurrent.futures
@@ -37,19 +38,18 @@ def save_json(name,obj):
     p.write_text(json.dumps(obj,indent=2,ensure_ascii=False),encoding="utf-8")
     return p
 def pretty_print(obj): print(json.dumps(obj,indent=2,ensure_ascii=False))
-def clear(): os.system("cls" if os.name=="nt" else "clear")
+def clear(): os.system("clear")
 
-# ---------------- Unlock flow ----------------
-YOUTUBE_URL="https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya"
+# ---------------- Unlock flow (Termux-ready) ----------------
 def unlock_flow():
     clear()
     print(Fore.CYAN+"🔒 Tool locked. Subscribe to unlock.")
     for s in ["9","8?","7?","6.","5.","4.","3.","2.","1"]:
-        print(Fore.MAGENTA+Style.BRIGHT+s,end=" ",flush=True)
+        print(Fore.MAGENTA+Style.BRIGHT+s, end=" ", flush=True)
         time.sleep(0.7)
-    print(Fore.GREEN+"\nOpening YouTube...")
-    try: import webbrowser; webbrowser.open(YOUTUBE_URL)
-    except: print(Fore.RED+"Open manually:",YOUTUBE_URL)
+    print(Fore.GREEN+"\nOpening YouTube app...")
+    YOUTUBE_URL="https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya"
+    os.system(f'am start -a android.intent.action.VIEW -d "{YOUTUBE_URL}"')
     input(Fore.CYAN+"\nAfter subscribing, press ENTER to continue...")
 
 def show_title():
@@ -112,7 +112,7 @@ def phone_info(number):
     except Exception as e: out["error"]=str(e)
     return out
 
-# ---------------- Username checker (demo) ----------------
+# ---------------- Username checker ----------------
 USERNAME_SITES=[
 ("Twitter","https://twitter.com/{}"),
 ("Instagram","https://www.instagram.com/{}"),
@@ -213,19 +213,4 @@ def interactive():
         elif choice=="4": ph=input("Phone (+country): "); last_result=phone_info(ph); pretty_print(last_result)
         elif choice=="5": uname=input("Username: "); last_result=username_check(uname); pretty_print(last_result)
         elif choice=="6": dom=input("Domain: "); last_result=crtsh_subdomains(dom); pretty_print(last_result)
-        elif choice=="7": u=input("URL: "); last_result=expand_url(u); pretty_print(last_result)
-        elif choice=="8": p=input("Image path: "); last_result=extract_exif(p); pretty_print(last_result)
-        elif choice=="s":
-            if not last_result: print(Fore.YELLOW+"No result to save"); continue
-            base=input("Base filename: ").strip() or "hco_report"
-            p=save_json(base,last_result); print(Fore.GREEN+f"Saved JSON: {p}")
-        elif choice=="q": print(Fore.GREEN+"Exiting."); break
-        else: print(Fore.RED+"Invalid choice")
-
-# ---------------- Main ----------------
-if __name__ == "__main__":
-    try:
-        unlock_flow()
-        interactive()
-    except KeyboardInterrupt:
-        print("\n"+Fore.RED+"Interrupted. Exiting.")
+        elif choice=="7": u=input("URL: "); last_result=expand_url(u);
