@@ -43,15 +43,12 @@ def unlock_flow():
 
 def show_title():
     clear()
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "█████╗ ██╗ ██████╗     ██████╗ ███████╗██╗███╗   ██╗████████╗")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "██╔══██╗██║██╔════╝    ██╔═══██╗██╔════╝██║████╗  ██║╚══██╔══╝")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "██║  ██║██║██║         ██║   ██║███████╗██║██╔██╗ ██║   ██║   ")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "██║  ██║██║██║         ██║   ██║╚════██║██║██║╚██╗██║   ██║   ")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "██████╔╝██║╚██████╗    ╚██████╔╝███████║██║██║ ╚████║   ██║   ")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "╚═════╝ ╚═╝ ╚═════╝     ╚═════╝ ╚══════╝╚═╝╚═╝  ╚═══╝   ╚═╝   ")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "                                                               ")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "                         by Azhar (Hackers Colony)            ")
-    print(Fore.WHITE+"-"*72)
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "              H C O   O S I N T")
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "           by Azhar (Hackers Colony)")
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
+    print()
 
 # ---------------- DNS Helper Functions ----------------
 def simple_dns_lookup(domain, record_type):
@@ -152,6 +149,7 @@ def phone_info(number):
         # Basic validation
         if cleaned.startswith('+'):
             out["international_format"] = True
+            out["country_code"] = cleaned[1:3] if len(cleaned) > 3 else "Unknown"
         else:
             out["international_format"] = False
             
@@ -167,6 +165,7 @@ USERNAME_SITES=[
     ("Instagram","https://www.instagram.com/{}"),
     ("GitHub","https://github.com/{}"),
     ("Reddit","https://www.reddit.com/user/{}"),
+    ("YouTube","https://www.youtube.com/@{}"),
 ]
 
 def _check_profile(site_name, pattern, uname):
