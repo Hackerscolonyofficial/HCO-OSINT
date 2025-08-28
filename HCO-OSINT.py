@@ -208,4 +208,7 @@ def interactive():
         elif choice=="4": ph=input("Phone (+country): "); last_result=phone_info(ph); pretty_print(last_result)
         elif choice=="5": uname=input("Username: "); last_result=username_check(uname); pretty_print(last_result)
         elif choice=="6": dom=input("Domain: "); last_result=crtsh_subdomains(dom); pretty_print(last_result)
-        elif choice=="7": u=input("URL
+        elif choice=="7": u=input("URL: "); last_result=expand_url(u); pretty_print(last_result)
+        elif choice=="8":
+            if not PIL_AVAILABLE: print(Fore.RED+"Pillow not installed"); continue
+            path=input("Image path: "); last_result=extract_exif(path); pretty_print(last_result)
