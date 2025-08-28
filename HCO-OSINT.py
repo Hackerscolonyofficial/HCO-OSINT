@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 import requests
 from colorama import Fore, Style, init
-import phonenumbers
 
 init(autoreset=True)
 REPORTS_DIR = Path("hco_reports")
@@ -43,11 +42,11 @@ def unlock_flow():
 
 def show_title():
     clear()
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "********************************************")
     print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "              H C O   O S I N T")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "********************************************")
     print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "           by Azhar (Hackers Colony)")
-    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "=" * 60)
+    print(Fore.LIGHTGREEN_EX + Style.BRIGHT + "********************************************")
     print()
 
 # ---------------- DNS Helper Functions ----------------
