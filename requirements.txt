@@ -1,9 +1,7 @@
-requests
-beautifulsoup4
-lxml
-python-whois
-phonenumbers
-shodan
-dnspython
 colorama
-termcolor
+phonenumbers
+python-whois
+dnspython
+ipwhois
+pillow
+qrcode
