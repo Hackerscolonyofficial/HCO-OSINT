@@ -1,0 +1,9 @@
+requests
+beautifulsoup4
+lxml
+python-whois
+phonenumbers
+shodan
+dnspython
+colorama
+termcolor
