@@ -1,133 +1,56 @@
 #!/usr/bin/env python3
-"""
-HCO OSINT Tool by Azhar
-Free API Based OSINT Scanner (Termux version)
-"""
-
-import requests, socket, time, os, sys, webbrowser
+import os
+import sys
+import time
+import requests
+import webbrowser
 from colorama import Fore, Style, init
+
+# Initialize colorama
 init(autoreset=True)
 
-YOUTUBE_URL = "https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya"
+# Path to store device-wide unlock flag
+UNLOCK_FILE = os.path.expanduser("~/.hco_osint_unlock")
+
+# ---------- Unlock / YouTube Redirect ----------
+def unlock():
+    if os.path.exists(UNLOCK_FILE):
+        return  # Already unlocked on this device
+
+    os.system("clear")
+    print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════")
+    print(Fore.RED + Style.BRIGHT + "       🔒 HCO-OSINT Tool Locked 🔒       ")
+    print(Fore.CYAN + "You must subscribe to Hackers Colony Tech")
+    print(Fore.CYAN + "and click the bell 🔔 to unlock the tool.")
+    print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════\n")
+
+    # Countdown
+    for i in range(8, 0, -1):
+        print(Fore.YELLOW + f"Redirecting to YouTube in {i} seconds...", end="\r")
+        time.sleep(1)
+
+    # Open YouTube channel
+    youtube_link = "https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya"
+    webbrowser.open(youtube_link)
+
+    # Wait for confirmation
+    input(Fore.GREEN + "\nPress Enter after subscribing to continue...")
+
+    # Create unlock file in home directory
+    with open(UNLOCK_FILE, "w") as f:
+        f.write("unlocked")
 
 # ---------- Banner ----------
 def banner():
     os.system("clear")
-    print(Fore.CYAN + "═══════════════════════════════════════")
-    print(Fore.RED + Style.BRIGHT + "     🚀 HCO OSINT TOOL by Azhar 🚀")
-    print(Fore.CYAN + "═══════════════════════════════════════\n")
+    print(Fore.MAGENTA + Style.BRIGHT + """
+╔════════════════════════════╗
+║      HCO-OSINT TOOL       ║
+║      By Azhar (Hackers Colony)     ║
+╚════════════════════════════╝
+""")
 
-# ---------- Unlock System ----------
-def unlock():
-    banner()
-    print(Fore.YELLOW + "🔒 This tool is locked!")
-    print(Fore.GREEN + "👉 To unlock, SUBSCRIBE & click the BELL 🔔 on our YouTube channel\n")
-    print(Fore.CYAN + "Redirecting in 8 seconds...\n")
-
-    for i in range(8,0,-1):
-        colors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.CYAN, Fore.MAGENTA, Fore.BLUE]
-        print(colors[i%len(colors)] + f"{i} ", end="\r")
-        time.sleep(1)
-
-    webbrowser.open(YOUTUBE_URL)  # open in YouTube app if installed
-    print(Fore.GREEN + "\n✅ After subscribing, return here to use the tool!\n")
-    input(Fore.CYAN + "Press Enter once you subscribed...")
-
-# ---------- Modules ----------
-def ip_lookup():
-    ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
-    try:
-        r = requests.get(f"http://ip-api.com/json/{ip}").json()
-        print(Fore.GREEN + "\n[+] IP Information:\n")
-        for k, v in r.items():
-            print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
-    except Exception as e:
-        print(Fore.RED + f"Error: {e}")
-
-def domain_lookup():
-    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
-    try:
-        ip = socket.gethostbyname(domain)
-        print(Fore.GREEN + f"\nDomain : {domain}\nIP     : {ip}\n")
-        r = requests.get(f"http://ip-api.com/json/{ip}").json()
-        for k, v in r.items():
-            print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
-    except Exception as e:
-        print(Fore.RED + f"Error: {e}")
-
-def headers_lookup():
-    url = input(Fore.CYAN + "\n[?] Enter Website URL (https://...): ")
-    try:
-        r = requests.get(url)
-        print(Fore.GREEN + "\n[+] Response Headers:\n")
-        for k, v in r.headers.items():
-            print(f"{Fore.YELLOW}{k}: {Fore.WHITE}{v}")
-    except Exception as e:
-        print(Fore.RED + f"Error: {e}")
-
-def phone_lookup():
-    phone = input(Fore.CYAN + "\n[?] Enter Phone Number with country code (+91...): ")
-    try:
-        # Free demo lookup
-        r = requests.get(f"https://numverify.com/php_helper_scripts/phone_api.php?number={phone}").json()
-        print(Fore.GREEN + "\n[+] Phone Information:\n")
-        for k, v in r.items():
-            print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
-    except Exception as e:
-        print(Fore.RED + f"Error: {e}")
-
-def email_lookup():
-    email = input(Fore.CYAN + "\n[?] Enter Email Address: ")
-    try:
-        r = requests.get(f"https://isitarealemail.com/api/email/validate?email={email}")
-        status = r.json().get("status")
-        print(Fore.GREEN + f"\nEmail: {email}")
-        print(Fore.YELLOW + "Status: " + Fore.WHITE + status)
-    except Exception as e:
-        print(Fore.RED + f"Error: {e}")
-
-def username_lookup():
-    username = input(Fore.CYAN + "\n[?] Enter Username: ")
-    sites = ["https://github.com/", "https://twitter.com/", "https://instagram.com/"]
-    print(Fore.GREEN + f"\n[+] Checking username '{username}' ...\n")
-    for site in sites:
-        url = site + username
-        try:
-            r = requests.get(url)
-            if r.status_code == 200:
-                print(Fore.GREEN + f"[FOUND] {url}")
-            else:
-                print(Fore.RED + f"[NOT FOUND] {url}")
-        except:
-            print(Fore.RED + f"[ERROR] {url}")
-
-def dns_lookup():
-    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
-    try:
-        r = requests.get(f"https://api.hackertarget.com/dnslookup/?q={domain}")
-        print(Fore.GREEN + "\n[+] DNS Lookup:\n")
-        print(Fore.WHITE + r.text)
-    except:
-        print(Fore.RED + "Error in DNS Lookup")
-
-def whois_lookup():
-    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
-    try:
-        r = requests.get(f"https://api.hackertarget.com/whois/?q={domain}")
-        print(Fore.GREEN + "\n[+] WHOIS Data:\n")
-        print(Fore.WHITE + r.text)
-    except:
-        print(Fore.RED + "Error in WHOIS")
-
-def subdomain_scan():
-    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
-    try:
-        r = requests.get(f"https://api.hackertarget.com/hostsearch/?q={domain}")
-        print(Fore.GREEN + "\n[+] Subdomains:\n")
-        print(Fore.WHITE + r.text)
-    except:
-        print(Fore.RED + "Error in Subdomain Scan")
-
+# ---------- OSINT Functions ----------
 def reverse_ip():
     ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
     try:
@@ -165,6 +88,8 @@ def port_scan():
     except:
         print(Fore.RED + "Error in Port Scan")
 
+# Add other OSINT functions here (ip_lookup, domain_lookup, etc.)
+
 # ---------- Menu ----------
 def menu():
     banner()
@@ -187,7 +112,7 @@ def menu():
 
 # ---------- Main ----------
 def main():
-    unlock()  # run unlock first
+    unlock()  # Run device-wide unlock first
     while True:
         menu()
         choice = input(Fore.YELLOW + "[?] Select option: ")
