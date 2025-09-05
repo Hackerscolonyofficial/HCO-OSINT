@@ -1,34 +1,49 @@
 #!/usr/bin/env python3
 """
-HCO OSINT Tool - Real Information Gathering Tool
-For ethical hackers and cybersecurity researchers
+HCO OSINT Tool - Advanced Open Source Intelligence Tool
+With authentication system and advanced features
 """
 
 import os
 import sys
+import time
+import json
 import socket
 import requests
 import whois
 import dns.resolver
-import json
-import time
 from urllib.parse import urlparse
-import subprocess
 import re
+import threading
+from datetime import datetime
 
 # Check if running on Termux
 IS_TERMUX = os.path.exists('/data/data/com.termux/files/usr')
 
-# Banner
-def print_banner():
-    os.system('clear' if not IS_TERMUX else 'termux-clipboard -c >/dev/null 2>&1')
-    print("\033[1;31m" + "="*60)
-    print("           HCO OSINT TOOL BY AZHAR")
-    print("="*60)
-    print("    Open Source Intelligence Gathering Tool")
-    print("        For Ethical Hackers & Researchers")
-    print("="*60 + "\033[0m")
-    print()
+# Colors for output
+class Colors:
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+# Tool states
+UNLOCKED = 0
+COUNTDOWN = 1
+LOCKED = 2
+SUCCESS = 3
+
+# Initialize tool state
+tool_state = LOCKED
+countdown_time = 10  # seconds
+start_time = 0
+youtube_url = "https://www.youtube.com/channel/UC9P7GSPQpPxjc6Uu-cx-F8w"
 
 # Check and install required packages
 def check_dependencies():
@@ -47,7 +62,7 @@ def check_dependencies():
             missing_packages.append(package)
     
     if missing_packages:
-        print("Installing missing dependencies...")
+        print(f"{Colors.YELLOW}Installing missing dependencies...{Colors.END}")
         if IS_TERMUX:
             for package in missing_packages:
                 os.system(f"pip install {package}")
@@ -59,35 +74,102 @@ def check_dependencies():
             try:
                 __import__(package.replace('-', '_'))
             except ImportError:
-                print(f"Failed to install {package}. Please install it manually.")
+                print(f"{Colors.RED}Failed to install {package}. Please install it manually.{Colors.END}")
                 return False
     return True
 
-# Domain information gathering
-def domain_info_gathering(domain):
-    print(f"\n\033[1;34m[+] Gathering information for: {domain}\033[0m")
+# Authentication system
+def show_lock_screen():
+    os.system('clear')
+    print(f"\n{Colors.RED}{Colors.BOLD}╔{'═'*60}╗{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'TOOL IS LOCKED! 🔐':^60}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'═'*60}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'Subscribe to our YouTube channel and':^60}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'click the bell icon to unlock the tool! 🔓':^60}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'═'*60}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'YouTube: Hackers Colony Official':^60}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}╚{'═'*60}╝{Colors.END}")
+    print(f"\n{Colors.CYAN}1. Subscribe on YouTube")
+    print(f"2. I've already subscribed (Unlock)")
+    print(f"3. Exit{Colors.END}")
+    
+    try:
+        choice = input(f"\n{Colors.YELLOW}Select option: {Colors.END}")
+        return choice
+    except KeyboardInterrupt:
+        print(f"\n{Colors.RED}Operation cancelled. Exiting...{Colors.END}")
+        sys.exit(0)
+
+def show_countdown():
+    os.system('clear')
+    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*60}╗{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}║{'REDIRECTING TO YOUTUBE...':^60}║{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*60}╝{Colors.END}")
+    
+    # Open YouTube channel
+    try:
+        import webbrowser
+        webbrowser.open(youtube_url)
+    except:
+        print(f"{Colors.YELLOW}Please visit: {youtube_url}{Colors.END}")
+    
+    # Countdown animation
+    for i in range(countdown_time, 0, -1):
+        print(f"\n{Colors.GREEN}{Colors.BOLD}Return to this tool in: {Colors.RED}{i}{Colors.GREEN} seconds{Colors.END}", end='\r')
+        time.sleep(1)
+    
+    print(f"\n{Colors.GREEN}{Colors.BOLD}Return to this tool in: {Colors.RED}0{Colors.GREEN} seconds{Colors.END}")
+    return True
+
+def show_unlock_screen():
+    os.system('clear')
+    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*60}╗{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}║{'TOOL UNLOCKED! 🔓':^60}║{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*60}╝{Colors.END}")
+    
+    # Draw blue box with red text
+    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*40}╗{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}║{Colors.RED}{'HCO OSINT by Azhar':^40}{Colors.BLUE}║{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*40}╝{Colors.END}")
+    
+    input(f"\n{Colors.GREEN}Press Enter to continue...{Colors.END}")
+    return True
+
+# Advanced OSINT functions
+def advanced_domain_info(domain):
+    print(f"\n{Colors.CYAN}{Colors.BOLD}[+] Advanced Domain Analysis for: {domain}{Colors.END}")
     
     results = {}
     
-    # WHOIS lookup
+    # WHOIS lookup with more details
     try:
-        print("[+] Performing WHOIS lookup...")
+        print(f"{Colors.YELLOW}[+] Performing comprehensive WHOIS lookup...{Colors.END}")
         domain_info = whois.whois(domain)
         results['whois'] = {
             'registrar': domain_info.registrar,
             'creation_date': str(domain_info.creation_date),
             'expiration_date': str(domain_info.expiration_date),
+            'updated_date': str(domain_info.updated_date),
             'name_servers': domain_info.name_servers,
-            'emails': domain_info.emails
+            'status': domain_info.status,
+            'emails': domain_info.emails,
+            'dnssec': domain_info.dnssec,
+            'name': domain_info.name,
+            'org': domain_info.org,
+            'address': domain_info.address,
+            'city': domain_info.city,
+            'state': domain_info.state,
+            'zipcode': domain_info.zipcode,
+            'country': domain_info.country
         }
     except Exception as e:
         results['whois'] = {'error': str(e)}
     
-    # DNS enumeration
+    # Comprehensive DNS enumeration
     try:
-        print("[+] Enumerating DNS records...")
+        print(f"{Colors.YELLOW}[+] Enumerating all DNS records...{Colors.END}")
         dns_results = {}
-        record_types = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME']
+        record_types = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME', 'SOA', 'SRV', 'PTR', 'CAA']
         
         for record_type in record_types:
             try:
@@ -100,19 +182,60 @@ def domain_info_gathering(domain):
     except Exception as e:
         results['dns'] = {'error': str(e)}
     
-    # Subdomain enumeration
+    # Subdomain enumeration with common and advanced wordlists
     try:
-        print("[+] Searching for subdomains...")
+        print(f"{Colors.YELLOW}[+] Advanced subdomain enumeration...{Colors.END}")
         subdomains = []
-        common_subdomains = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'pop', 'ns1', 'webdisk', 'cpanel', 
-                            'whm', 'autodiscover', 'autoconfig', 'm', 'imap', 'test', 'ns', 'blog', 'pop3', 'dev',
-                            'www2', 'admin', 'forum', 'news', 'vpn', 'ns2', 'mysql', 'ftp', 'news', 'u', 'email']
+        common_subdomains = [
+            'www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'pop', 'ns1', 
+            'webdisk', 'cpanel', 'whm', 'autodiscover', 'autoconfig', 'm', 'imap', 
+            'test', 'ns', 'blog', 'pop3', 'dev', 'www2', 'admin', 'forum', 'news', 
+            'vpn', 'ns2', 'mysql', 'news', 'email', 'shop', 'api', 'secure', 'demo', 
+            'portal', 'gateway', 'client', 'clients', 'support', 'web', 'apps', 'app',
+            'cloud', 'cdn', 'static', 'media', 'images', 'img', 'video', 'videos',
+            'download', 'uploads', 'files', 'storage', 'db', 'database', 'server',
+            'servers', 'proxy', 'firewall', 'router', 'network', 'net', 'internal',
+            'external', 'remote', 'access', 'admin', 'administrator', 'login', 'signin',
+            'auth', 'authentication', 'oauth', 'sso', 'account', 'accounts', 'user',
+            'users', 'member', 'members', 'profile', 'profiles', 'dashboard', 'console',
+            'control', 'manage', 'manager', 'management', 'system', 'sys', 'service',
+            'services', 'api', 'apis', 'graphql', 'rest', 'soap', 'xml', 'json', 'rpc',
+            'ws', 'wss', 'ssh', 'ftp', 'sftp', 'tftp', 'telnet', 'dns', 'dhcp', 'ldap',
+            'radius', 'vpn', 'pptp', 'l2tp', 'sstp', 'openvpn', 'wireguard', 'ipsec',
+            'ike', 'ikev2', 'gre', 'tunnel', 'bridge', 'switch', 'hub', 'router', 'gateway',
+            'firewall', 'ids', 'ips', 'waf', 'proxy', 'loadbalancer', 'loadbalance', 'lb',
+            'cache', 'caching', 'cdn', 'content', 'delivery', 'network', 'edge', 'origin',
+            'pop', 'point', 'of', 'presence', 'datacenter', 'dc', 'server', 'host', 'hosting',
+            'cloud', 'aws', 'azure', 'gcp', 'google', 'amazon', 'digitalocean', 'linode',
+            'vultr', 'heroku', 'netlify', 'vercel', 'github', 'gitlab', 'bitbucket', 'jenkins',
+            'travis', 'circleci', 'docker', 'kubernetes', 'k8s', 'openshift', 'rancher',
+            'mesos', 'marathon', 'nomad', 'consul', 'vault', 'terraform', 'packer', 'ansible',
+            'puppet', 'chef', 'salt', 'nagios', 'zabbix', 'prometheus', 'grafana', 'elk',
+            'elastic', 'logstash', 'kibana', 'splunk', 'newrelic', 'datadog', 'dynatrace',
+            'appdynamics', 'sentry', 'raygun', 'bugsnag', 'rollbar', 'airbrake', 'honeybadger',
+            'scout', 'instrumental', 'librato', 'circonus', 'netdata', 'cacti', 'observium',
+            'prtg', 'whatsup', 'gold', 'site24x7', 'pingdom', 'uptimerobot', 'statuscake',
+            'freshping', 'monitor', 'monitoring', 'alert', 'alerts', 'notification', 'notifications',
+            'report', 'reports', 'analytics', 'stats', 'statistics', 'metrics', 'measure', 'measurement',
+            'track', 'tracking', 'trace', 'tracing', 'debug', 'debugging', 'profile', 'profiling',
+            'optimize', 'optimization', 'performance', 'speed', 'accelerate', 'acceleration',
+            'compress', 'compression', 'minify', 'minification', 'bundle', 'bundling', 'pack',
+            'packaging', 'deploy', 'deployment', 'release', 'releases', 'version', 'versions',
+            'build', 'builds', 'compile', 'compilation', 'test', 'tests', 'testing', 'qa',
+            'quality', 'assurance', 'stage', 'staging', 'prod', 'production', 'live', 'preprod',
+            'preproduction', 'dev', 'development', 'uat', 'user', 'acceptance', 'testing', 'sandbox',
+            'demo', 'demonstration', 'playground', 'experiment', 'experimental', 'research', 'lab',
+            'laboratory', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta',
+            'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'omicron', 'pi', 'rho', 'sigma', 'tau',
+            'upsilon', 'phi', 'chi', 'psi', 'omega'
+        ]
         
         for sub in common_subdomains:
             full_domain = f"{sub}.{domain}"
             try:
                 socket.gethostbyname(full_domain)
                 subdomains.append(full_domain)
+                print(f"{Colors.GREEN}[+] Found subdomain: {full_domain}{Colors.END}")
             except socket.gaierror:
                 continue
         
@@ -120,82 +243,140 @@ def domain_info_gathering(domain):
     except Exception as e:
         results['subdomains'] = {'error': str(e)}
     
-    # HTTP headers
+    # HTTP headers and security analysis
     try:
-        print("[+] Analyzing HTTP headers...")
-        url = f"http://{domain}"
-        response = requests.get(url, timeout=10)
-        results['http_headers'] = dict(response.headers)
-    except:
-        try:
-            url = f"https://{domain}"
-            response = requests.get(url, timeout=10, verify=False)
-            results['http_headers'] = dict(response.headers)
-        except Exception as e:
-            results['http_headers'] = {'error': str(e)}
+        print(f"{Colors.YELLOW}[+] Analyzing HTTP headers and security...{Colors.END}")
+        headers_results = {}
+        
+        for protocol in ['http', 'https']:
+            try:
+                url = f"{protocol}://{domain}"
+                response = requests.get(url, timeout=10, verify=False)
+                headers_results[protocol] = {
+                    'status_code': response.status_code,
+                    'headers': dict(response.headers),
+                    'server': response.headers.get('Server', 'Unknown'),
+                    'x-powered-by': response.headers.get('X-Powered-By', 'Unknown'),
+                    'content-type': response.headers.get('Content-Type', 'Unknown'),
+                    'security_headers': {
+                        'strict-transport-security': response.headers.get('Strict-Transport-Security', 'Missing'),
+                        'x-frame-options': response.headers.get('X-Frame-Options', 'Missing'),
+                        'x-content-type-options': response.headers.get('X-Content-Type-Options', 'Missing'),
+                        'x-xss-protection': response.headers.get('X-XSS-Protection', 'Missing'),
+                        'content-security-policy': response.headers.get('Content-Security-Policy', 'Missing'),
+                        'referrer-policy': response.headers.get('Referrer-Policy', 'Missing'),
+                        'permissions-policy': response.headers.get('Permissions-Policy', 'Missing')
+                    }
+                }
+            except:
+                headers_results[protocol] = {'error': f'Could not connect via {protocol}'}
+        
+        results['http_analysis'] = headers_results
+    except Exception as e:
+        results['http_analysis'] = {'error': str(e)}
+    
+    # SSL certificate information (if HTTPS works)
+    try:
+        print(f"{Colors.YELLOW}[+] Analyzing SSL certificate...{Colors.END}")
+        import ssl
+        context = ssl.create_default_context()
+        with socket.create_connection((domain, 443), timeout=10) as sock:
+            with context.wrap_socket(sock, server_hostname=domain) as ssock:
+                cert = ssock.getpeercert()
+                results['ssl_certificate'] = {
+                    'issuer': dict(x[0] for x in cert['issuer']),
+                    'subject': dict(x[0] for x in cert['subject']),
+                    'version': cert.get('version', 'Unknown'),
+                    'serialNumber': cert.get('serialNumber', 'Unknown'),
+                    'notBefore': cert.get('notBefore', 'Unknown'),
+                    'notAfter': cert.get('notAfter', 'Unknown'),
+                    'subjectAltName': cert.get('subjectAltName', [])
+                }
+    except Exception as e:
+        results['ssl_certificate'] = {'error': str(e)}
     
     return results
 
-# IP information gathering
-def ip_info_gathering(ip):
-    print(f"\n\033[1;34m[+] Gathering information for IP: {ip}\033[0m")
+def advanced_ip_info(ip):
+    print(f"\n{Colors.CYAN}{Colors.BOLD}[+] Advanced IP Analysis for: {ip}{Colors.END}")
     
     results = {}
     
     try:
-        # Get IP information from ip-api.com
-        print("[+] Querying IP information...")
-        response = requests.get(f"http://ip-api.com/json/{ip}").json()
+        # Get detailed IP information from ip-api.com
+        print(f"{Colors.YELLOW}[+] Querying detailed IP information...{Colors.END}")
+        response = requests.get(f"http://ip-api.com/json/{ip}?fields=66846719").json()
         
         if response['status'] == 'success':
             results['ip_info'] = {
-                'country': response['country'],
-                'region': response['regionName'],
-                'city': response['city'],
-                'zip': response['zip'],
-                'lat': response['lat'],
-                'lon': response['lon'],
-                'timezone': response['timezone'],
-                'isp': response['isp'],
-                'org': response['org'],
-                'as': response['as']
+                'country': response.get('country', 'Unknown'),
+                'countryCode': response.get('countryCode', 'Unknown'),
+                'region': response.get('regionName', 'Unknown'),
+                'regionCode': response.get('region', 'Unknown'),
+                'city': response.get('city', 'Unknown'),
+                'zip': response.get('zip', 'Unknown'),
+                'lat': response.get('lat', 'Unknown'),
+                'lon': response.get('lon', 'Unknown'),
+                'timezone': response.get('timezone', 'Unknown'),
+                'isp': response.get('isp', 'Unknown'),
+                'org': response.get('org', 'Unknown'),
+                'as': response.get('as', 'Unknown'),
+                'asname': response.get('asname', 'Unknown'),
+                'reverse': response.get('reverse', 'Unknown'),
+                'mobile': response.get('mobile', False),
+                'proxy': response.get('proxy', False),
+                'hosting': response.get('hosting', False)
             }
         else:
             results['ip_info'] = {'error': 'Failed to get IP information'}
     except Exception as e:
         results['ip_info'] = {'error': str(e)}
     
-    # Reverse DNS lookup
+    # Advanced port scanning
     try:
-        print("[+] Performing reverse DNS lookup...")
-        hostname = socket.gethostbyaddr(ip)
-        results['reverse_dns'] = hostname[0]
-    except:
-        results['reverse_dns'] = 'Not found'
-    
-    # Check open ports
-    try:
-        print("[+] Scanning for common open ports...")
-        common_ports = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 993, 995, 1723, 3306, 3389, 5900, 8080]
+        print(f"{Colors.YELLOW}[+] Performing advanced port scan...{Colors.END}")
+        common_ports = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 
+                        993, 995, 1723, 3306, 3389, 5900, 8080, 8443, 8888]
         open_ports = []
         
         for port in common_ports:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)
-            result = sock.connect_ex((ip, port))
-            if result == 0:
-                open_ports.append(port)
-            sock.close()
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(1)
+                result = sock.connect_ex((ip, port))
+                if result == 0:
+                    open_ports.append(port)
+                    print(f"{Colors.GREEN}[+] Open port found: {port}{Colors.END}")
+                sock.close()
+            except:
+                pass
         
         results['open_ports'] = open_ports
     except Exception as e:
         results['open_ports'] = {'error': str(e)}
     
+    # Service detection on open ports
+    try:
+        print(f"{Colors.YELLOW}[+] Detecting services on open ports...{Colors.END}")
+        services = {}
+        port_services = {
+            21: 'FTP', 22: 'SSH', 23: 'Telnet', 25: 'SMTP', 53: 'DNS', 80: 'HTTP',
+            110: 'POP3', 135: 'MSRPC', 139: 'NetBIOS', 143: 'IMAP', 443: 'HTTPS',
+            445: 'SMB', 993: 'IMAPS', 995: 'POP3S', 1723: 'PPTP', 3306: 'MySQL',
+            3389: 'RDP', 5900: 'VNC', 8080: 'HTTP-Alt', 8443: 'HTTPS-Alt', 8888: 'HTTP-Alt'
+        }
+        
+        for port in results.get('open_ports', []):
+            services[port] = port_services.get(port, 'Unknown')
+        
+        results['services'] = services
+    except Exception as e:
+        results['services'] = {'error': str(e)}
+    
     return results
 
-# Email information gathering
-def email_info_gathering(email):
-    print(f"\n\033[1;34m[+] Gathering information for email: {email}\033[0m")
+def advanced_email_info(email):
+    print(f"\n{Colors.CYAN}{Colors.BOLD}[+] Advanced Email Analysis for: {email}{Colors.END}")
     
     results = {}
     
@@ -208,366 +389,64 @@ def email_info_gathering(email):
     # Extract domain from email
     domain = email.split('@')[1]
     
-    # Get domain information
-    results['domain_info'] = domain_info_gathering(domain)
+    # Get comprehensive domain information
+    results['domain_info'] = advanced_domain_info(domain)
     
-    # Check if email exists using haveibeenpwned API (anonymously)
+    # Advanced email verification
     try:
-        print("[+] Checking if email was involved in data breaches...")
-        url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
-        headers = {'User-Agent': 'HCO-OSINT-Tool'}
-        response = requests.get(url, headers=headers, timeout=10)
+        print(f"{Colors.YELLOW}[+] Performing advanced email verification...{Colors.END}")
+        # Check if email exists using MailboxValidator API (free tier)
+        try:
+            mbv_response = requests.get(f"https://api.mailboxvalidator.com/v1/validation?email={email}&key=DEMO_KEY")
+            if mbv_response.status_code == 200:
+                mbv_data = mbv_response.json()
+                results['email_validation'] = {
+                    'is_valid': mbv_data.get('is_verified', 'Unknown'),
+                    'is_disposable': mbv_data.get('is_disposable', 'Unknown'),
+                    'is_free': mbv_data.get('is_free', 'Unknown'),
+                    'is_syntax': mbv_data.get('is_syntax', 'Unknown'),
+                    'is_domain': mbv_data.get('is_domain', 'Unknown'),
+                    'is_smtp': mbv_data.get('is_smtp', 'Unknown'),
+                    'is_verified': mbv_data.get('is_verified', 'Unknown'),
+                    'is_server_down': mbv_data.get('is_server_down', 'Unknown'),
+                    'is_greylisted': mbv_data.get('is_greylisted', 'Unknown'),
+                    'is_high_risk': mbv_data.get('is_high_risk', 'Unknown'),
+                    'is_catchall': mbv_data.get('is_catchall', 'Unknown'),
+                    'mailboxvalidator_score': mbv_data.get('mailboxvalidator_score', 'Unknown'),
+                    'time_taken': mbv_data.get('time_taken', 'Unknown'),
+                    'status': mbv_data.get('status', 'Unknown'),
+                    'credits_available': mbv_data.get('credits_available', 'Unknown')
+                }
+        except:
+            results['email_validation'] = {'error': 'MailboxValidator API not available'}
         
-        if response.status_code == 200:
-            breaches = response.json()
-            results['breaches'] = [{'Name': b['Name'], 'BreachDate': b['BreachDate']} for b in breaches]
-        else:
-            results['breaches'] = 'No breaches found or API limit exceeded'
-    except Exception as e:
-        results['breaches'] = {'error': str(e)}
-    
-    return results
-
-# Phone number information
-def phone_info_gathering(phone):
-    print(f"\n\033[1;34m[+] Gathering information for phone: {phone}\033[0m")
-    
-    results = {}
-    
-    # Basic validation
-    phone = re.sub(r'\D', '', phone)
-    if len(phone) < 10:
-        results['error'] = 'Invalid phone number'
-        return results
-    
-    # Try to get carrier information
-    try:
-        print("[+] Identifying carrier...")
-        # This is a simple implementation - in a real tool you'd use a proper API
-        carriers = {
-            '130': 'T-Mobile',
-            '131': 'T-Mobile',
-            '132': 'Verizon',
-            '133': 'Sprint',
-            '134': 'AT&T',
-            '135': 'AT&T',
-            '136': 'T-Mobile',
-            '137': 'Verizon',
-            '138': 'Sprint',
-            '139': 'AT&T'
-        }
+        # Check if email was involved in data breaches
+        print(f"{Colors.YELLOW}[+] Checking data breaches...{Colors.END}")
+        try:
+            # Using haveibeenpwned API
+            headers = {'User-Agent': 'HCO-OSINT-Tool-v2.0'}
+            hibp_response = requests.get(f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}", headers=headers, timeout=10)
+            
+            if hibp_response.status_code == 200:
+                breaches = hibp_response.json()
+                results['breaches'] = [{
+                    'Name': b.get('Name', 'Unknown'),
+                    'Title': b.get('Title', 'Unknown'),
+                    'Domain': b.get('Domain', 'Unknown'),
+                    'BreachDate': b.get('BreachDate', 'Unknown'),
+                    'AddedDate': b.get('AddedDate', 'Unknown'),
+                    'ModifiedDate': b.get('ModifiedDate', 'Unknown'),
+                    'PwnCount': b.get('PwnCount', 'Unknown'),
+                    'Description': b.get('Description', 'Unknown'),
+                    'DataClasses': b.get('DataClasses', [])
+                } for b in breaches]
+            else:
+                results['breaches'] = 'No breaches found or API limit exceeded'
+        except Exception as e:
+            results['breaches'] = {'error': str(e)}
         
-        prefix = phone[:3]
-        results['carrier'] = carriers.get(prefix, 'Unknown carrier')
     except Exception as e:
-        results['carrier'] = {'error': str(e)}
-    
-    # Try to get location based on area code (US only)
-    try:
-        print("[+] Estimating location...")
-        area_codes = {
-            '201': 'New Jersey',
-            '202': 'Washington DC',
-            '203': 'Connecticut',
-            '205': 'Alabama',
-            '206': 'Washington',
-            '212': 'New York',
-            '213': 'California',
-            '214': 'Texas',
-            '215': 'Pennsylvania',
-            '216': 'Ohio',
-            '217': 'Illinois',
-            '218': 'Minnesota',
-            '219': 'Indiana',
-            '224': 'Illinois',
-            '225': 'Louisiana',
-            '228': 'Mississippi',
-            '229': 'Georgia',
-            '231': 'Michigan',
-            '234': 'Ohio',
-            '239': 'Florida',
-            '240': 'Maryland',
-            '248': 'Michigan',
-            '251': 'Alabama',
-            '252': 'North Carolina',
-            '253': 'Washington',
-            '254': 'Texas',
-            '256': 'Alabama',
-            '260': 'Indiana',
-            '262': 'Wisconsin',
-            '267': 'Pennsylvania',
-            '269': 'Michigan',
-            '270': 'Kentucky',
-            '272': 'Pennsylvania',
-            '276': 'Virginia',
-            '281': 'Texas',
-            '301': 'Maryland',
-            '302': 'Delaware',
-            '303': 'Colorado',
-            '304': 'West Virginia',
-            '305': 'Florida',
-            '307': 'Wyoming',
-            '308': 'Nebraska',
-            '309': 'Illinois',
-            '310': 'California',
-            '312': 'Illinois',
-            '313': 'Michigan',
-            '314': 'Missouri',
-            '315': 'New York',
-            '316': 'Kansas',
-            '317': 'Indiana',
-            '318': 'Louisiana',
-            '319': 'Iowa',
-            '320': 'Minnesota',
-            '321': 'Florida',
-            '323': 'California',
-            '325': 'Texas',
-            '330': 'Ohio',
-            '331': 'Illinois',
-            '334': 'Alabama',
-            '336': 'North Carolina',
-            '337': 'Louisiana',
-            '339': 'Massachusetts',
-            '347': 'New York',
-            '351': 'Massachusetts',
-            '352': 'Florida',
-            '360': 'Washington',
-            '361': 'Texas',
-            '385': 'Utah',
-            '386': 'Florida',
-            '401': 'Rhode Island',
-            '402': 'Nebraska',
-            '404': 'Georgia',
-            '405': 'Oklahoma',
-            '406': 'Montana',
-            '407': 'Florida',
-            '408': 'California',
-            '409': 'Texas',
-            '410': 'Maryland',
-            '412': 'Pennsylvania',
-            '413': 'Massachusetts',
-            '414': 'Wisconsin',
-            '415': 'California',
-            '417': 'Missouri',
-            '419': 'Ohio',
-            '423': 'Tennessee',
-            '424': 'California',
-            '425': 'Washington',
-            '430': 'Texas',
-            '432': 'Texas',
-            '434': 'Virginia',
-            '435': 'Utah',
-            '440': 'Ohio',
-            '443': 'Maryland',
-            '445': 'Pennsylvania',
-            '464': 'Illinois',
-            '469': 'Texas',
-            '470': 'Georgia',
-            '475': 'Connecticut',
-            '478': 'Georgia',
-            '479': 'Arkansas',
-            '480': 'Arizona',
-            '484': 'Pennsylvania',
-            '501': 'Arkansas',
-            '502': 'Kentucky',
-            '503': 'Oregon',
-            '504': 'Louisiana',
-            '505': 'New Mexico',
-            '507': 'Minnesota',
-            '508': 'Massachusetts',
-            '509': 'Washington',
-            '510': 'California',
-            '512': 'Texas',
-            '513': 'Ohio',
-            '515': 'Iowa',
-            '516': 'New York',
-            '517': 'Michigan',
-            '518': 'New York',
-            '520': 'Arizona',
-            '530': 'California',
-            '540': 'Virginia',
-            '541': 'Oregon',
-            '551': 'New Jersey',
-            '559': 'California',
-            '561': 'Florida',
-            '562': 'California',
-            '563': 'Iowa',
-            '564': 'Washington',
-            '567': 'Ohio',
-            '570': 'Pennsylvania',
-            '571': 'Virginia',
-            '573': 'Missouri',
-            '574': 'Indiana',
-            '575': 'New Mexico',
-            '580': 'Oklahoma',
-            '585': 'New York',
-            '586': 'Michigan',
-            '601': 'Mississippi',
-            '602': 'Arizona',
-            '603': 'New Hampshire',
-            '605': 'South Dakota',
-            '606': 'Kentucky',
-            '607': 'New York',
-            '608': 'Wisconsin',
-            '609': 'New Jersey',
-            '610': 'Pennsylvania',
-            '612': 'Minnesota',
-            '614': 'Ohio',
-            '615': 'Tennessee',
-            '616': 'Michigan',
-            '617': 'Massachusetts',
-            '618': 'Illinois',
-            '619': 'California',
-            '620': 'Kansas',
-            '623': 'Arizona',
-            '626': 'California',
-            '630': 'Illinois',
-            '631': 'New York',
-            '636': 'Missouri',
-            '641': 'Iowa',
-            '646': 'New York',
-            '650': 'California',
-            '651': 'Minnesota',
-            '657': 'California',
-            '660': 'Missouri',
-            '661': 'California',
-            '662': 'Mississippi',
-            '667': 'Maryland',
-            '669': 'California',
-            '670': 'Northern Mariana Islands',
-            '671': 'Guam',
-            '678': 'Georgia',
-            '681': 'West Virginia',
-            '682': 'Texas',
-            '684': 'American Samoa',
-            '701': 'North Dakota',
-            '702': 'Nevada',
-            '703': 'Virginia',
-            '704': 'North Carolina',
-            '706': 'Georgia',
-            '707': 'California',
-            '708': 'Illinois',
-            '712': 'Iowa',
-            '713': 'Texas',
-            '714': 'California',
-            '715': 'Wisconsin',
-            '716': 'New York',
-            '717': 'Pennsylvania',
-            '718': 'New York',
-            '719': 'Colorado',
-            '720': 'Colorado',
-            '724': 'Pennsylvania',
-            '725': 'Nevada',
-            '727': 'Florida',
-            '731': 'Tennessee',
-            '732': 'New Jersey',
-            '734': 'Michigan',
-            '737': 'Texas',
-            '740': 'Ohio',
-            '747': 'California',
-            '754': 'Florida',
-            '757': 'Virginia',
-            '760': 'California',
-            '762': 'Georgia',
-            '763': 'Minnesota',
-            '765': 'Indiana',
-            '769': 'Mississippi',
-            '770': 'Georgia',
-            '772': 'Florida',
-            '773': 'Illinois',
-            '774': 'Massachusetts',
-            '775': 'Nevada',
-            '779': 'Illinois',
-            '781': 'Massachusetts',
-            '785': 'Kansas',
-            '786': 'Florida',
-            '787': 'Puerto Rico',
-            '801': 'Utah',
-            '802': 'Vermont',
-            '803': 'South Carolina',
-            '804': 'Virginia',
-            '805': 'California',
-            '806': 'Texas',
-            '808': 'Hawaii',
-            '810': 'Michigan',
-            '812': 'Indiana',
-            '813': 'Florida',
-            '814': 'Pennsylvania',
-            '815': 'Illinois',
-            '816': 'Missouri',
-            '817': 'Texas',
-            '818': 'California',
-            '828': 'North Carolina',
-            '830': 'Texas',
-            '831': 'California',
-            '832': 'Texas',
-            '843': 'South Carolina',
-            '845': 'New York',
-            '847': 'Illinois',
-            '848': 'New Jersey',
-            '850': 'Florida',
-            '856': 'New Jersey',
-            '857': 'Massachusetts',
-            '858': 'California',
-            '859': 'Kentucky',
-            '860': 'Connecticut',
-            '862': 'New Jersey',
-            '863': 'Florida',
-            '864': 'South Carolina',
-            '865': 'Tennessee',
-            '870': 'Arkansas',
-            '872': 'Illinois',
-            '878': 'Pennsylvania',
-            '901': 'Tennessee',
-            '903': 'Texas',
-            '904': 'Florida',
-            '906': 'Michigan',
-            '907': 'Alaska',
-            '908': 'New Jersey',
-            '909': 'California',
-            '910': 'North Carolina',
-            '912': 'Georgia',
-            '913': 'Kansas',
-            '914': 'New York',
-            '915': 'Texas',
-            '916': 'California',
-            '917': 'New York',
-            '918': 'Oklahoma',
-            '919': 'North Carolina',
-            '920': 'Wisconsin',
-            '925': 'California',
-            '928': 'Arizona',
-            '931': 'Tennessee',
-            '936': 'Texas',
-            '937': 'Ohio',
-            '939': 'Puerto Rico',
-            '940': 'Texas',
-            '941': 'Florida',
-            '947': 'Michigan',
-            '949': 'California',
-            '951': 'California',
-            '952': 'Minnesota',
-            '954': 'Florida',
-            '956': 'Texas',
-            '957': 'New Mexico',
-            '959': 'Connecticut',
-            '970': 'Colorado',
-            '971': 'Oregon',
-            '972': 'Texas',
-            '973': 'New Jersey',
-            '975': 'Missouri',
-            '978': 'Massachusetts',
-            '979': 'Texas',
-            '980': 'North Carolina',
-            '984': 'North Carolina',
-            '985': 'Louisiana',
-            '989': 'Michigan'
-        }
-        
-        area_code = phone[:3]
-        results['location'] = area_codes.get(area_code, 'Unknown location')
-    except Exception as e:
-        results['location'] = {'error': str(e)}
+        results['email_validation'] = {'error': str(e)}
     
     return results
 
@@ -579,100 +458,125 @@ def save_results(data, filename):
                 json.dump(data, f, indent=4)
             else:
                 f.write(str(data))
-        print(f"\033[1;32m[+] Results saved to: {filename}\033[0m")
+        print(f"{Colors.GREEN}[+] Results saved to: {filename}{Colors.END}")
     except Exception as e:
-        print(f"\033[1;31m[-] Error saving results: {e}\033[0m")
+        print(f"{Colors.RED}[-] Error saving results: {e}{Colors.END}")
 
 # Main menu
 def main_menu():
-    print_banner()
-    print("\033[1;36m1. Domain Information Gathering")
-    print("2. IP Address Information Gathering")
-    print("3. Email Information Gathering")
-    print("4. Phone Number Information Gathering")
-    print("5. Exit\033[0m")
+    os.system('clear')
+    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*60}╗{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}║{'HCO OSINT TOOL - MAIN MENU':^60}║{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*60}╝{Colors.END}")
+    
+    print(f"\n{Colors.CYAN}{Colors.BOLD}1. Advanced Domain Information Gathering")
+    print(f"2. Advanced IP Address Information Gathering")
+    print(f"3. Advanced Email Information Gathering")
+    print(f"4. Phone Number Information Gathering")
+    print(f"5. Exit{Colors.END}")
     print()
     
     try:
-        choice = input("\033[1;33mSelect an option (1-5): \033[0m")
+        choice = input(f"{Colors.YELLOW}Select an option (1-5): {Colors.END}")
         
         if choice == "1":
             target = input("Enter domain name (example.com): ").strip()
             if target:
-                results = domain_info_gathering(target)
-                print("\n\033[1;32m[+] Domain Information Results:\033[0m")
+                results = advanced_domain_info(target)
+                print(f"\n{Colors.GREEN}{Colors.BOLD}[+] Domain Information Results:{Colors.END}")
                 print(json.dumps(results, indent=4))
                 
                 # Save results
                 filename = f"domain_{target}_{int(time.time())}.json"
                 save_results(results, filename)
             else:
-                print("\033[1;31m[-] Please enter a valid domain\033[0m")
+                print(f"{Colors.RED}[-] Please enter a valid domain{Colors.END}")
         
         elif choice == "2":
             target = input("Enter IP address: ").strip()
             if target:
-                results = ip_info_gathering(target)
-                print("\n\033[1;32m[+] IP Information Results:\033[0m")
+                results = advanced_ip_info(target)
+                print(f"\n{Colors.GREEN}{Colors.BOLD}[+] IP Information Results:{Colors.END}")
                 print(json.dumps(results, indent=4))
                 
                 # Save results
                 filename = f"ip_{target}_{int(time.time())}.json"
                 save_results(results, filename)
             else:
-                print("\033[1;31m[-] Please enter a valid IP address\033[0m")
+                print(f"{Colors.RED}[-] Please enter a valid IP address{Colors.END}")
         
         elif choice == "3":
             target = input("Enter email address: ").strip()
             if target:
-                results = email_info_gathering(target)
-                print("\n\033[1;32m[+] Email Information Results:\033[0m")
+                results = advanced_email_info(target)
+                print(f"\n{Colors.GREEN}{Colors.BOLD}[+] Email Information Results:{Colors.END}")
                 print(json.dumps(results, indent=4))
                 
                 # Save results
                 filename = f"email_{target}_{int(time.time())}.json"
                 save_results(results, filename)
             else:
-                print("\033[1;31m[-] Please enter a valid email address\033[0m")
+                print(f"{Colors.RED}[-] Please enter a valid email address{Colors.END}")
         
         elif choice == "4":
             target = input("Enter phone number: ").strip()
             if target:
-                results = phone_info_gathering(target)
-                print("\n\033[1;32m[+] Phone Information Results:\033[0m")
-                print(json.dumps(results, indent=4))
-                
-                # Save results
-                filename = f"phone_{target}_{int(time.time())}.json"
-                save_results(results, filename)
+                # Placeholder for phone analysis
+                print(f"{Colors.YELLOW}[+] Phone analysis feature coming soon!{Colors.END}")
             else:
-                print("\033[1;31m[-] Please enter a valid phone number\033[0m")
+                print(f"{Colors.RED}[-] Please enter a valid phone number{Colors.END}")
         
         elif choice == "5":
-            print("\033[1;32m[+] Thank you for using HCO OSINT Tool. Goodbye!\033[0m")
+            print(f"{Colors.GREEN}[+] Thank you for using HCO OSINT Tool. Goodbye!{Colors.END}")
             sys.exit(0)
         
         else:
-            print("\033[1;31m[-] Invalid option. Please try again.\033[0m")
+            print(f"{Colors.RED}[-] Invalid option. Please try again.{Colors.END}")
     
     except KeyboardInterrupt:
-        print("\n\033[1;32m[+] Operation cancelled by user. Exiting...\033[0m")
+        print(f"\n{Colors.RED}Operation cancelled by user. Exiting...{Colors.END}")
         sys.exit(0)
     except Exception as e:
-        print(f"\033[1;31m[-] An error occurred: {e}\033[0m")
+        print(f"{Colors.RED}[-] An error occurred: {e}{Colors.END}")
 
 # Main function
 def main():
+    global tool_state
+    
     # Check dependencies
     if not check_dependencies():
-        print("\033[1;31m[-] Failed to install required dependencies. Exiting...\033[0m")
+        print(f"{Colors.RED}[-] Failed to install required dependencies. Exiting...{Colors.END}")
         sys.exit(1)
     
-    # Main loop
+    # Authentication system
+    while tool_state != UNLOCKED:
+        if tool_state == LOCKED:
+            choice = show_lock_screen()
+            
+            if choice == "1":
+                tool_state = COUNTDOWN
+            elif choice == "2":
+                tool_state = SUCCESS
+            elif choice == "3":
+                print(f"{Colors.GREEN}[+] Thank you for using HCO OSINT Tool. Goodbye!{Colors.END}")
+                sys.exit(0)
+            else:
+                print(f"{Colors.RED}[-] Invalid option. Please try again.{Colors.END}")
+                time.sleep(2)
+        
+        elif tool_state == COUNTDOWN:
+            if show_countdown():
+                tool_state = SUCCESS
+        
+        elif tool_state == SUCCESS:
+            if show_unlock_screen():
+                tool_state = UNLOCKED
+    
+    # Main tool loop
     while True:
         main_menu()
         print()
-        input("\033[1;33mPress Enter to continue...\033[0m")
+        input(f"{Colors.YELLOW}Press Enter to continue...{Colors.END}")
 
 if __name__ == "__main__":
     main()
