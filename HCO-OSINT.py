@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 HCO OSINT Tool - Advanced Open Source Intelligence Tool
-With authentication system and advanced features
+With authentication system, countdown, and YouTube redirection
 """
 
 import os
@@ -110,15 +110,24 @@ def show_countdown():
     try:
         import webbrowser
         webbrowser.open(youtube_url)
+        print(f"{Colors.GREEN}✓ YouTube channel opened in browser{Colors.END}")
     except:
         print(f"{Colors.YELLOW}Please visit: {youtube_url}{Colors.END}")
     
     # Countdown animation
+    print(f"\n{Colors.GREEN}{Colors.BOLD}Please subscribe and click the bell icon!{Colors.END}")
+    print(f"{Colors.YELLOW}Return to this tool after subscribing.{Colors.END}")
+    print()
+    
     for i in range(countdown_time, 0, -1):
-        print(f"\n{Colors.GREEN}{Colors.BOLD}Return to this tool in: {Colors.RED}{i}{Colors.GREEN} seconds{Colors.END}", end='\r')
+        minutes = i // 60
+        seconds = i % 60
+        countdown_str = f"{minutes:02d}:{seconds:02d}"
+        
+        print(f"{Colors.RED}{Colors.BOLD}⏰ Time remaining: {countdown_str}{Colors.END}", end='\r')
         time.sleep(1)
     
-    print(f"\n{Colors.GREEN}{Colors.BOLD}Return to this tool in: {Colors.RED}0{Colors.GREEN} seconds{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}⏰ Time remaining: 00:00{' '*10}{Colors.END}")
     return True
 
 def show_unlock_screen():
@@ -132,7 +141,10 @@ def show_unlock_screen():
     print(f"{Colors.BLUE}{Colors.BOLD}║{Colors.RED}{'HCO OSINT by Azhar':^40}{Colors.BLUE}║{Colors.END}")
     print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*40}╝{Colors.END}")
     
-    input(f"\n{Colors.GREEN}Press Enter to continue...{Colors.END}")
+    print(f"\n{Colors.GREEN}{Colors.BOLD}Thank you for subscribing!{Colors.END}")
+    print(f"{Colors.CYAN}You now have full access to the HCO OSINT Tool.{Colors.END}")
+    
+    input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.END}")
     return True
 
 # Advanced OSINT functions
@@ -169,7 +181,7 @@ def advanced_domain_info(domain):
     try:
         print(f"{Colors.YELLOW}[+] Enumerating all DNS records...{Colors.END}")
         dns_results = {}
-        record_types = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME', 'SOA', 'SRV', 'PTR', 'CAA']
+        record_types = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME', 'SOA', 'SRV']
         
         for record_type in record_types:
             try:
@@ -182,52 +194,17 @@ def advanced_domain_info(domain):
     except Exception as e:
         results['dns'] = {'error': str(e)}
     
-    # Subdomain enumeration with common and advanced wordlists
+    # Subdomain enumeration
     try:
         print(f"{Colors.YELLOW}[+] Advanced subdomain enumeration...{Colors.END}")
         subdomains = []
         common_subdomains = [
-            'www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'pop', 'ns1', 
-            'webdisk', 'cpanel', 'whm', 'autodiscover', 'autoconfig', 'm', 'imap', 
-            'test', 'ns', 'blog', 'pop3', 'dev', 'www2', 'admin', 'forum', 'news', 
-            'vpn', 'ns2', 'mysql', 'news', 'email', 'shop', 'api', 'secure', 'demo', 
-            'portal', 'gateway', 'client', 'clients', 'support', 'web', 'apps', 'app',
-            'cloud', 'cdn', 'static', 'media', 'images', 'img', 'video', 'videos',
-            'download', 'uploads', 'files', 'storage', 'db', 'database', 'server',
-            'servers', 'proxy', 'firewall', 'router', 'network', 'net', 'internal',
-            'external', 'remote', 'access', 'admin', 'administrator', 'login', 'signin',
-            'auth', 'authentication', 'oauth', 'sso', 'account', 'accounts', 'user',
-            'users', 'member', 'members', 'profile', 'profiles', 'dashboard', 'console',
-            'control', 'manage', 'manager', 'management', 'system', 'sys', 'service',
-            'services', 'api', 'apis', 'graphql', 'rest', 'soap', 'xml', 'json', 'rpc',
-            'ws', 'wss', 'ssh', 'ftp', 'sftp', 'tftp', 'telnet', 'dns', 'dhcp', 'ldap',
-            'radius', 'vpn', 'pptp', 'l2tp', 'sstp', 'openvpn', 'wireguard', 'ipsec',
-            'ike', 'ikev2', 'gre', 'tunnel', 'bridge', 'switch', 'hub', 'router', 'gateway',
-            'firewall', 'ids', 'ips', 'waf', 'proxy', 'loadbalancer', 'loadbalance', 'lb',
-            'cache', 'caching', 'cdn', 'content', 'delivery', 'network', 'edge', 'origin',
-            'pop', 'point', 'of', 'presence', 'datacenter', 'dc', 'server', 'host', 'hosting',
-            'cloud', 'aws', 'azure', 'gcp', 'google', 'amazon', 'digitalocean', 'linode',
-            'vultr', 'heroku', 'netlify', 'vercel', 'github', 'gitlab', 'bitbucket', 'jenkins',
-            'travis', 'circleci', 'docker', 'kubernetes', 'k8s', 'openshift', 'rancher',
-            'mesos', 'marathon', 'nomad', 'consul', 'vault', 'terraform', 'packer', 'ansible',
-            'puppet', 'chef', 'salt', 'nagios', 'zabbix', 'prometheus', 'grafana', 'elk',
-            'elastic', 'logstash', 'kibana', 'splunk', 'newrelic', 'datadog', 'dynatrace',
-            'appdynamics', 'sentry', 'raygun', 'bugsnag', 'rollbar', 'airbrake', 'honeybadger',
-            'scout', 'instrumental', 'librato', 'circonus', 'netdata', 'cacti', 'observium',
-            'prtg', 'whatsup', 'gold', 'site24x7', 'pingdom', 'uptimerobot', 'statuscake',
-            'freshping', 'monitor', 'monitoring', 'alert', 'alerts', 'notification', 'notifications',
-            'report', 'reports', 'analytics', 'stats', 'statistics', 'metrics', 'measure', 'measurement',
-            'track', 'tracking', 'trace', 'tracing', 'debug', 'debugging', 'profile', 'profiling',
-            'optimize', 'optimization', 'performance', 'speed', 'accelerate', 'acceleration',
-            'compress', 'compression', 'minify', 'minification', 'bundle', 'bundling', 'pack',
-            'packaging', 'deploy', 'deployment', 'release', 'releases', 'version', 'versions',
-            'build', 'builds', 'compile', 'compilation', 'test', 'tests', 'testing', 'qa',
-            'quality', 'assurance', 'stage', 'staging', 'prod', 'production', 'live', 'preprod',
-            'preproduction', 'dev', 'development', 'uat', 'user', 'acceptance', 'testing', 'sandbox',
-            'demo', 'demonstration', 'playground', 'experiment', 'experimental', 'research', 'lab',
-            'laboratory', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'zeta', 'eta', 'theta',
-            'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi', 'omicron', 'pi', 'rho', 'sigma', 'tau',
-            'upsilon', 'phi', 'chi', 'psi', 'omega'
+            'www', 'mail', 'ftp', 'webmail', 'smtp', 'pop', 'ns1', 
+            'webdisk', 'cpanel', 'whm', 'autodiscover', 'dev', 'test',
+            'blog', 'api', 'secure', 'admin', 'forum', 'news', 'vpn',
+            'ns2', 'mysql', 'email', 'shop', 'portal', 'cloud', 'cdn',
+            'static', 'media', 'download', 'uploads', 'server', 'proxy',
+            'firewall', 'router', 'network', 'internal', 'external'
         ]
         
         for sub in common_subdomains:
@@ -254,18 +231,13 @@ def advanced_domain_info(domain):
                 response = requests.get(url, timeout=10, verify=False)
                 headers_results[protocol] = {
                     'status_code': response.status_code,
-                    'headers': dict(response.headers),
                     'server': response.headers.get('Server', 'Unknown'),
                     'x-powered-by': response.headers.get('X-Powered-By', 'Unknown'),
-                    'content-type': response.headers.get('Content-Type', 'Unknown'),
                     'security_headers': {
                         'strict-transport-security': response.headers.get('Strict-Transport-Security', 'Missing'),
                         'x-frame-options': response.headers.get('X-Frame-Options', 'Missing'),
                         'x-content-type-options': response.headers.get('X-Content-Type-Options', 'Missing'),
                         'x-xss-protection': response.headers.get('X-XSS-Protection', 'Missing'),
-                        'content-security-policy': response.headers.get('Content-Security-Policy', 'Missing'),
-                        'referrer-policy': response.headers.get('Referrer-Policy', 'Missing'),
-                        'permissions-policy': response.headers.get('Permissions-Policy', 'Missing')
                     }
                 }
             except:
@@ -274,26 +246,6 @@ def advanced_domain_info(domain):
         results['http_analysis'] = headers_results
     except Exception as e:
         results['http_analysis'] = {'error': str(e)}
-    
-    # SSL certificate information (if HTTPS works)
-    try:
-        print(f"{Colors.YELLOW}[+] Analyzing SSL certificate...{Colors.END}")
-        import ssl
-        context = ssl.create_default_context()
-        with socket.create_connection((domain, 443), timeout=10) as sock:
-            with context.wrap_socket(sock, server_hostname=domain) as ssock:
-                cert = ssock.getpeercert()
-                results['ssl_certificate'] = {
-                    'issuer': dict(x[0] for x in cert['issuer']),
-                    'subject': dict(x[0] for x in cert['subject']),
-                    'version': cert.get('version', 'Unknown'),
-                    'serialNumber': cert.get('serialNumber', 'Unknown'),
-                    'notBefore': cert.get('notBefore', 'Unknown'),
-                    'notAfter': cert.get('notAfter', 'Unknown'),
-                    'subjectAltName': cert.get('subjectAltName', [])
-                }
-    except Exception as e:
-        results['ssl_certificate'] = {'error': str(e)}
     
     return results
 
@@ -305,14 +257,12 @@ def advanced_ip_info(ip):
     try:
         # Get detailed IP information from ip-api.com
         print(f"{Colors.YELLOW}[+] Querying detailed IP information...{Colors.END}")
-        response = requests.get(f"http://ip-api.com/json/{ip}?fields=66846719").json()
+        response = requests.get(f"http://ip-api.com/json/{ip}").json()
         
         if response['status'] == 'success':
             results['ip_info'] = {
                 'country': response.get('country', 'Unknown'),
-                'countryCode': response.get('countryCode', 'Unknown'),
                 'region': response.get('regionName', 'Unknown'),
-                'regionCode': response.get('region', 'Unknown'),
                 'city': response.get('city', 'Unknown'),
                 'zip': response.get('zip', 'Unknown'),
                 'lat': response.get('lat', 'Unknown'),
@@ -320,12 +270,7 @@ def advanced_ip_info(ip):
                 'timezone': response.get('timezone', 'Unknown'),
                 'isp': response.get('isp', 'Unknown'),
                 'org': response.get('org', 'Unknown'),
-                'as': response.get('as', 'Unknown'),
-                'asname': response.get('asname', 'Unknown'),
-                'reverse': response.get('reverse', 'Unknown'),
-                'mobile': response.get('mobile', False),
-                'proxy': response.get('proxy', False),
-                'hosting': response.get('hosting', False)
+                'as': response.get('as', 'Unknown')
             }
         else:
             results['ip_info'] = {'error': 'Failed to get IP information'}
@@ -336,7 +281,7 @@ def advanced_ip_info(ip):
     try:
         print(f"{Colors.YELLOW}[+] Performing advanced port scan...{Colors.END}")
         common_ports = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 
-                        993, 995, 1723, 3306, 3389, 5900, 8080, 8443, 8888]
+                        993, 995, 1723, 3306, 3389, 5900, 8080, 8443]
         open_ports = []
         
         for port in common_ports:
@@ -354,24 +299,6 @@ def advanced_ip_info(ip):
         results['open_ports'] = open_ports
     except Exception as e:
         results['open_ports'] = {'error': str(e)}
-    
-    # Service detection on open ports
-    try:
-        print(f"{Colors.YELLOW}[+] Detecting services on open ports...{Colors.END}")
-        services = {}
-        port_services = {
-            21: 'FTP', 22: 'SSH', 23: 'Telnet', 25: 'SMTP', 53: 'DNS', 80: 'HTTP',
-            110: 'POP3', 135: 'MSRPC', 139: 'NetBIOS', 143: 'IMAP', 443: 'HTTPS',
-            445: 'SMB', 993: 'IMAPS', 995: 'POP3S', 1723: 'PPTP', 3306: 'MySQL',
-            3389: 'RDP', 5900: 'VNC', 8080: 'HTTP-Alt', 8443: 'HTTPS-Alt', 8888: 'HTTP-Alt'
-        }
-        
-        for port in results.get('open_ports', []):
-            services[port] = port_services.get(port, 'Unknown')
-        
-        results['services'] = services
-    except Exception as e:
-        results['services'] = {'error': str(e)}
     
     return results
 
@@ -395,30 +322,6 @@ def advanced_email_info(email):
     # Advanced email verification
     try:
         print(f"{Colors.YELLOW}[+] Performing advanced email verification...{Colors.END}")
-        # Check if email exists using MailboxValidator API (free tier)
-        try:
-            mbv_response = requests.get(f"https://api.mailboxvalidator.com/v1/validation?email={email}&key=DEMO_KEY")
-            if mbv_response.status_code == 200:
-                mbv_data = mbv_response.json()
-                results['email_validation'] = {
-                    'is_valid': mbv_data.get('is_verified', 'Unknown'),
-                    'is_disposable': mbv_data.get('is_disposable', 'Unknown'),
-                    'is_free': mbv_data.get('is_free', 'Unknown'),
-                    'is_syntax': mbv_data.get('is_syntax', 'Unknown'),
-                    'is_domain': mbv_data.get('is_domain', 'Unknown'),
-                    'is_smtp': mbv_data.get('is_smtp', 'Unknown'),
-                    'is_verified': mbv_data.get('is_verified', 'Unknown'),
-                    'is_server_down': mbv_data.get('is_server_down', 'Unknown'),
-                    'is_greylisted': mbv_data.get('is_greylisted', 'Unknown'),
-                    'is_high_risk': mbv_data.get('is_high_risk', 'Unknown'),
-                    'is_catchall': mbv_data.get('is_catchall', 'Unknown'),
-                    'mailboxvalidator_score': mbv_data.get('mailboxvalidator_score', 'Unknown'),
-                    'time_taken': mbv_data.get('time_taken', 'Unknown'),
-                    'status': mbv_data.get('status', 'Unknown'),
-                    'credits_available': mbv_data.get('credits_available', 'Unknown')
-                }
-        except:
-            results['email_validation'] = {'error': 'MailboxValidator API not available'}
         
         # Check if email was involved in data breaches
         print(f"{Colors.YELLOW}[+] Checking data breaches...{Colors.END}")
@@ -435,10 +338,8 @@ def advanced_email_info(email):
                     'Domain': b.get('Domain', 'Unknown'),
                     'BreachDate': b.get('BreachDate', 'Unknown'),
                     'AddedDate': b.get('AddedDate', 'Unknown'),
-                    'ModifiedDate': b.get('ModifiedDate', 'Unknown'),
                     'PwnCount': b.get('PwnCount', 'Unknown'),
                     'Description': b.get('Description', 'Unknown'),
-                    'DataClasses': b.get('DataClasses', [])
                 } for b in breaches]
             else:
                 results['breaches'] = 'No breaches found or API limit exceeded'
@@ -473,11 +374,13 @@ def main_menu():
     print(f"2. Advanced IP Address Information Gathering")
     print(f"3. Advanced Email Information Gathering")
     print(f"4. Phone Number Information Gathering")
-    print(f"5. Exit{Colors.END}")
+    print(f"5. Social Media Analysis")
+    print(f"6. Metadata Extraction")
+    print(f"7. Exit{Colors.END}")
     print()
     
     try:
-        choice = input(f"{Colors.YELLOW}Select an option (1-5): {Colors.END}")
+        choice = input(f"{Colors.YELLOW}Select an option (1-7): {Colors.END}")
         
         if choice == "1":
             target = input("Enter domain name (example.com): ").strip()
@@ -521,12 +424,25 @@ def main_menu():
         elif choice == "4":
             target = input("Enter phone number: ").strip()
             if target:
-                # Placeholder for phone analysis
                 print(f"{Colors.YELLOW}[+] Phone analysis feature coming soon!{Colors.END}")
             else:
                 print(f"{Colors.RED}[-] Please enter a valid phone number{Colors.END}")
         
         elif choice == "5":
+            target = input("Enter username or profile URL: ").strip()
+            if target:
+                print(f"{Colors.YELLOW}[+] Social media analysis feature coming soon!{Colors.END}")
+            else:
+                print(f"{Colors.RED}[-] Please enter a valid username or URL{Colors.END}")
+        
+        elif choice == "6":
+            target = input("Enter file path or URL: ").strip()
+            if target:
+                print(f"{Colors.YELLOW}[+] Metadata extraction feature coming soon!{Colors.END}")
+            else:
+                print(f"{Colors.RED}[-] Please enter a valid file path or URL{Colors.END}")
+        
+        elif choice == "7":
             print(f"{Colors.GREEN}[+] Thank you for using HCO OSINT Tool. Goodbye!{Colors.END}")
             sys.exit(0)
         
