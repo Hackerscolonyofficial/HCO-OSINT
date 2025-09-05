@@ -1,180 +1,217 @@
 #!/usr/bin/env python3
 """
-HCO-OSINT Tool
-By Azhar (Hackers Colony)
+HCO OSINT Tool by Azhar
+Free API Based OSINT Scanner (Termux version)
 """
 
-import os, sys, time, socket, requests, whois, phonenumbers, dns.resolver
-from colorama import Fore, Back, Style, init
-
+import requests, socket, time, os, sys, webbrowser
+from colorama import Fore, Style, init
 init(autoreset=True)
 
-YOUTUBE = "https://youtube.com/@hackers_colony_tech"
+YOUTUBE_URL = "https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya"
 
-# Fancy print helpers
+# ---------- Banner ----------
 def banner():
-    print(Back.BLUE + Fore.RED + Style.BRIGHT + "\n      HCO OSINT TOOL by Azhar      \n" + Style.RESET_ALL)
+    os.system("clear")
+    print(Fore.CYAN + "═══════════════════════════════════════")
+    print(Fore.RED + Style.BRIGHT + "     🚀 HCO OSINT TOOL by Azhar 🚀")
+    print(Fore.CYAN + "═══════════════════════════════════════\n")
 
-def countdown_redirect():
-    print(Fore.RED + Style.BRIGHT + "\n🔒 Tool Locked – Subscribe to unlock!\n")
-    for i in range(10, 0, -1):
-        print(Fore.YELLOW + f"Redirecting to YouTube in {i}...", end="\r")
-        time.sleep(1)
-    print()
-    os.system(f"xdg-open {YOUTUBE}")
-    input(Fore.CYAN + "\n👉 Press ENTER after subscribing to continue...")
-
-def menu():
+# ---------- Unlock System ----------
+def unlock():
     banner()
-    print(Fore.GREEN + Style.BRIGHT + """
-[1] Phone Number OSINT
-[2] Email Breach Check (basic regex/domain)
-[3] Domain WHOIS Lookup
-[4] IP Lookup + Reverse DNS
-[5] Username Check (GitHub, Reddit, Twitter)
-[6] Website Header Grabber
-[7] Subdomain Finder (common wordlist)
-[8] Port Scanner (1–100 common ports)
-[9] Image Metadata Extractor
-[0] Exit
-""")
+    print(Fore.YELLOW + "🔒 This tool is locked!")
+    print(Fore.GREEN + "👉 To unlock, SUBSCRIBE & click the BELL 🔔 on our YouTube channel\n")
+    print(Fore.CYAN + "Redirecting in 8 seconds...\n")
 
-def phone_lookup():
-    number = input(Fore.CYAN + "Enter phone number with country code (+91...): ")
-    try:
-        parsed = phonenumbers.parse(number, None)
-        valid = phonenumbers.is_valid_number(parsed)
-        region = phonenumbers.region_code_for_number(parsed)
-        carrier = phonenumbers.carrier.name_for_number(parsed, "en")
-        print(Fore.YELLOW + f"\nNumber: {number}")
-        print(Fore.GREEN + f"Valid: {valid}")
-        print(Fore.CYAN + f"Region: {region}")
-        print(Fore.MAGENTA + f"Carrier: {carrier}\n")
-    except Exception as e:
-        print(Fore.RED + f"Error: {e}")
+    for i in range(8,0,-1):
+        colors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.CYAN, Fore.MAGENTA, Fore.BLUE]
+        print(colors[i%len(colors)] + f"{i} ", end="\r")
+        time.sleep(1)
 
-def email_check():
-    email = input(Fore.CYAN + "Enter email: ")
-    if "@" in email and "." in email:
-        domain = email.split("@")[1]
-        print(Fore.YELLOW + f"\nEmail looks valid. Domain: {domain}")
-        try:
-            dns.resolver.resolve(domain, "MX")
-            print(Fore.GREEN + "✅ Domain has MX records (email service active)")
-        except:
-            print(Fore.RED + "❌ No MX records – might be invalid domain")
-    else:
-        print(Fore.RED + "Invalid email format")
+    webbrowser.open(YOUTUBE_URL)  # open in YouTube app if installed
+    print(Fore.GREEN + "\n✅ After subscribing, return here to use the tool!\n")
+    input(Fore.CYAN + "Press Enter once you subscribed...")
 
-def domain_lookup():
-    domain = input(Fore.CYAN + "Enter domain (example.com): ")
-    try:
-        w = whois.whois(domain)
-        for k, v in w.items():
-            print(Fore.GREEN + f"{k}: {v}")
-    except Exception as e:
-        print(Fore.RED + f"Error: {e}")
-
+# ---------- Modules ----------
 def ip_lookup():
-    ip = input(Fore.CYAN + "Enter IP address: ")
-    try:
-        host = socket.gethostbyaddr(ip)
-        print(Fore.YELLOW + f"Reverse DNS: {host[0]}")
-    except:
-        print(Fore.RED + "No reverse DNS found")
+    ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
     try:
         r = requests.get(f"http://ip-api.com/json/{ip}").json()
+        print(Fore.GREEN + "\n[+] IP Information:\n")
         for k, v in r.items():
-            print(Fore.GREEN + f"{k}: {v}")
+            print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
     except Exception as e:
         print(Fore.RED + f"Error: {e}")
 
-def username_check():
-    user = input(Fore.CYAN + "Enter username: ")
-    sites = {
-        "GitHub": f"https://github.com/{user}",
-        "Reddit": f"https://www.reddit.com/user/{user}",
-        "Twitter": f"https://x.com/{user}"
-    }
-    for s, url in sites.items():
-        try:
-            r = requests.get(url, timeout=5)
-            if r.status_code == 200:
-                print(Fore.GREEN + f"✅ Found on {s}: {url}")
-            else:
-                print(Fore.RED + f"❌ Not on {s}")
-        except:
-            print(Fore.RED + f"Error checking {s}")
-
-def header_grabber():
-    site = input(Fore.CYAN + "Enter website (http/https): ")
+def domain_lookup():
+    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
     try:
-        r = requests.get(site)
-        print(Fore.GREEN + "\nHeaders:")
+        ip = socket.gethostbyname(domain)
+        print(Fore.GREEN + f"\nDomain : {domain}\nIP     : {ip}\n")
+        r = requests.get(f"http://ip-api.com/json/{ip}").json()
+        for k, v in r.items():
+            print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
+    except Exception as e:
+        print(Fore.RED + f"Error: {e}")
+
+def headers_lookup():
+    url = input(Fore.CYAN + "\n[?] Enter Website URL (https://...): ")
+    try:
+        r = requests.get(url)
+        print(Fore.GREEN + "\n[+] Response Headers:\n")
         for k, v in r.headers.items():
-            print(Fore.YELLOW + f"{k}: {v}")
+            print(f"{Fore.YELLOW}{k}: {Fore.WHITE}{v}")
     except Exception as e:
         print(Fore.RED + f"Error: {e}")
 
-def subdomain_finder():
-    domain = input(Fore.CYAN + "Enter domain: ")
-    wordlist = ["www", "mail", "ftp", "dev", "test", "admin"]
-    print(Fore.YELLOW + "\nScanning common subdomains...")
-    for sub in wordlist:
-        subdomain = f"{sub}.{domain}"
-        try:
-            socket.gethostbyname(subdomain)
-            print(Fore.GREEN + f"✅ Found: {subdomain}")
-        except:
-            pass
-
-def port_scanner():
-    host = input(Fore.CYAN + "Enter host (IP/domain): ")
-    print(Fore.YELLOW + "\nScanning ports 1–100...")
-    for port in range(1, 101):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(0.5)
-        try:
-            if s.connect_ex((host, port)) == 0:
-                print(Fore.GREEN + f"Open: {port}")
-            s.close()
-        except:
-            pass
-
-def image_metadata():
-    from PIL import Image
-    from PIL.ExifTags import TAGS
-    path = input(Fore.CYAN + "Enter image path: ")
+def phone_lookup():
+    phone = input(Fore.CYAN + "\n[?] Enter Phone Number with country code (+91...): ")
     try:
-        img = Image.open(path)
-        exif = img._getexif()
-        if not exif:
-            print(Fore.RED + "No EXIF metadata found")
-            return
-        for tag, val in exif.items():
-            tagname = TAGS.get(tag, tag)
-            print(Fore.GREEN + f"{tagname}: {val}")
+        # Free demo lookup
+        r = requests.get(f"https://numverify.com/php_helper_scripts/phone_api.php?number={phone}").json()
+        print(Fore.GREEN + "\n[+] Phone Information:\n")
+        for k, v in r.items():
+            print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
     except Exception as e:
         print(Fore.RED + f"Error: {e}")
 
-# --- Main ---
-if __name__ == "__main__":
-    countdown_redirect()
+def email_lookup():
+    email = input(Fore.CYAN + "\n[?] Enter Email Address: ")
+    try:
+        r = requests.get(f"https://isitarealemail.com/api/email/validate?email={email}")
+        status = r.json().get("status")
+        print(Fore.GREEN + f"\nEmail: {email}")
+        print(Fore.YELLOW + "Status: " + Fore.WHITE + status)
+    except Exception as e:
+        print(Fore.RED + f"Error: {e}")
+
+def username_lookup():
+    username = input(Fore.CYAN + "\n[?] Enter Username: ")
+    sites = ["https://github.com/", "https://twitter.com/", "https://instagram.com/"]
+    print(Fore.GREEN + f"\n[+] Checking username '{username}' ...\n")
+    for site in sites:
+        url = site + username
+        try:
+            r = requests.get(url)
+            if r.status_code == 200:
+                print(Fore.GREEN + f"[FOUND] {url}")
+            else:
+                print(Fore.RED + f"[NOT FOUND] {url}")
+        except:
+            print(Fore.RED + f"[ERROR] {url}")
+
+def dns_lookup():
+    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
+    try:
+        r = requests.get(f"https://api.hackertarget.com/dnslookup/?q={domain}")
+        print(Fore.GREEN + "\n[+] DNS Lookup:\n")
+        print(Fore.WHITE + r.text)
+    except:
+        print(Fore.RED + "Error in DNS Lookup")
+
+def whois_lookup():
+    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
+    try:
+        r = requests.get(f"https://api.hackertarget.com/whois/?q={domain}")
+        print(Fore.GREEN + "\n[+] WHOIS Data:\n")
+        print(Fore.WHITE + r.text)
+    except:
+        print(Fore.RED + "Error in WHOIS")
+
+def subdomain_scan():
+    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
+    try:
+        r = requests.get(f"https://api.hackertarget.com/hostsearch/?q={domain}")
+        print(Fore.GREEN + "\n[+] Subdomains:\n")
+        print(Fore.WHITE + r.text)
+    except:
+        print(Fore.RED + "Error in Subdomain Scan")
+
+def reverse_ip():
+    ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
+    try:
+        r = requests.get(f"https://api.hackertarget.com/reverseiplookup/?q={ip}")
+        print(Fore.GREEN + "\n[+] Reverse IP Results:\n")
+        print(Fore.WHITE + r.text)
+    except:
+        print(Fore.RED + "Error in Reverse IP Lookup")
+
+def trace_route():
+    host = input(Fore.CYAN + "\n[?] Enter Host/Domain: ")
+    try:
+        r = requests.get(f"https://api.hackertarget.com/mtr/?q={host}")
+        print(Fore.GREEN + "\n[+] Traceroute:\n")
+        print(Fore.WHITE + r.text)
+    except:
+        print(Fore.RED + "Error in Traceroute")
+
+def geoip_lookup():
+    ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
+    try:
+        r = requests.get(f"https://ipinfo.io/{ip}/json").json()
+        print(Fore.GREEN + "\n[+] GeoIP Information:\n")
+        for k, v in r.items():
+            print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
+    except:
+        print(Fore.RED + "Error in GeoIP Lookup")
+
+def port_scan():
+    host = input(Fore.CYAN + "\n[?] Enter Host/IP: ")
+    try:
+        r = requests.get(f"https://api.hackertarget.com/nmap/?q={host}")
+        print(Fore.GREEN + "\n[+] Port Scan Results:\n")
+        print(Fore.WHITE + r.text)
+    except:
+        print(Fore.RED + "Error in Port Scan")
+
+# ---------- Menu ----------
+def menu():
+    banner()
+    print(Fore.CYAN + Style.BRIGHT + """
+[1]  IP Lookup
+[2]  Domain Lookup
+[3]  HTTP Headers
+[4]  Phone Lookup
+[5]  Email Lookup
+[6]  Username Lookup
+[7]  DNS Lookup
+[8]  WHOIS Lookup
+[9]  Subdomain Scan
+[10] Reverse IP Lookup
+[11] Traceroute
+[12] GeoIP Lookup
+[13] Port Scan
+[0]  Exit
+""")
+
+# ---------- Main ----------
+def main():
+    unlock()  # run unlock first
     while True:
         menu()
-        choice = input(Fore.CYAN + "Select option: ")
-        if choice == "1": phone_lookup()
-        elif choice == "2": email_check()
-        elif choice == "3": domain_lookup()
-        elif choice == "4": ip_lookup()
-        elif choice == "5": username_check()
-        elif choice == "6": header_grabber()
-        elif choice == "7": subdomain_finder()
-        elif choice == "8": port_scanner()
-        elif choice == "9": image_metadata()
+        choice = input(Fore.YELLOW + "[?] Select option: ")
+
+        if choice == "1": ip_lookup()
+        elif choice == "2": domain_lookup()
+        elif choice == "3": headers_lookup()
+        elif choice == "4": phone_lookup()
+        elif choice == "5": email_lookup()
+        elif choice == "6": username_lookup()
+        elif choice == "7": dns_lookup()
+        elif choice == "8": whois_lookup()
+        elif choice == "9": subdomain_scan()
+        elif choice == "10": reverse_ip()
+        elif choice == "11": trace_route()
+        elif choice == "12": geoip_lookup()
+        elif choice == "13": port_scan()
         elif choice == "0":
-            print(Fore.MAGENTA + "Bye 👋")
+            print(Fore.GREEN + "\nExiting... Bye!\n")
             sys.exit()
         else:
-            print(Fore.RED + "Invalid option")
+            print(Fore.RED + "Invalid Choice!")
+
         input(Fore.CYAN + "\nPress Enter to continue...")
+
+if __name__ == "__main__":
+    main()
