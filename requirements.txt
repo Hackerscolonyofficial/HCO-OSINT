@@ -1,10 +1,4 @@
-colorama
-phonenumbers
-python-whois
-dnspython
-ipwhois
-pillow
-qrcode
 requests
-beautifulsoup4
-lxml
+phonenumbers
+whois
+colorama
