@@ -5,3 +5,6 @@ dnspython
 ipwhois
 pillow
 qrcode
+requests
+beautifulsoup4
+lxml
