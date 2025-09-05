@@ -1,665 +1,678 @@
-import pygame
+#!/usr/bin/env python3
+"""
+HCO OSINT Tool - Real Information Gathering Tool
+For ethical hackers and cybersecurity researchers
+"""
+
+import os
 import sys
-import webbrowser
+import socket
+import requests
+import whois
+import dns.resolver
+import json
 import time
-from datetime import datetime
+from urllib.parse import urlparse
+import subprocess
+import re
 
-# Initialize pygame
-pygame.init()
-pygame.font.init()
+# Check if running on Termux
+IS_TERMUX = os.path.exists('/data/data/com.termux/files/usr')
 
-# Screen dimensions
-WIDTH, HEIGHT = 1000, 700
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("HCO OSINT Tool - Advanced Intelligence Platform")
+# Banner
+def print_banner():
+    os.system('clear' if not IS_TERMUX else 'termux-clipboard -c >/dev/null 2>&1')
+    print("\033[1;31m" + "="*60)
+    print("           HCO OSINT TOOL BY AZHAR")
+    print("="*60)
+    print("    Open Source Intelligence Gathering Tool")
+    print("        For Ethical Hackers & Researchers")
+    print("="*60 + "\033[0m")
+    print()
 
-# Colors
-DARK_BG = (10, 15, 30)
-LIGHT_BG = (20, 25, 40)
-HIGHLIGHT = (0, 100, 200)
-ACCENT = (0, 150, 255)
-WHITE = (220, 220, 220)
-GRAY = (150, 150, 150)
-GREEN = (0, 200, 100)
-RED = (220, 50, 50)
-YELLOW = (220, 180, 60)
-BLUE = (30, 70, 150)
-PURPLE = (150, 60, 220)
-ORANGE = (255, 150, 50)
-
-# Fonts
-title_font = pygame.font.SysFont("arial", 32, bold=True)
-header_font = pygame.font.SysFont("arial", 24, bold=True)
-main_font = pygame.font.SysFont("arial", 18)
-small_font = pygame.font.SysFont("arial", 14)
-large_font = pygame.font.SysFont("arial", 48, bold=True)
-
-# Tool states
-UNLOCKED = 0
-COUNTDOWN = 1
-LOCKED = 2
-SUCCESS = 3
-
-# Initialize tool state
-tool_state = LOCKED
-countdown_time = 10  # seconds
-start_time = 0
-entered_code = ""
-subscription_message = "Tool is locked! Subscribe and click the bell icon to unlock!"
-youtube_url = "https://www.youtube.com/channel/UC9P7GSPQpPxjc6Uu-cx-F8w"
-
-# OSINT data (simulated)
-domain_data = {
-    "whois": {
-        "Registrar": "NameCheap, Inc.",
-        "Creation Date": "2018-05-15",
-        "Expiration Date": "2024-05-15",
-        "Name Servers": ["ns1.digitalocean.com", "ns2.digitalocean.com", "ns3.digitalocean.com"],
-        "Registrant": "REDACTED FOR PRIVACY",
-        "Admin Contact": "REDACTED FOR PRIVACY",
-        "Technical Contact": "REDACTED FOR PRIVACY",
-        "Status": "clientTransferProhibited"
-    },
-    "dns": {
-        "A": ["192.0.2.44", "192.0.2.45"],
-        "AAAA": ["2001:0db8:85a3:0000:0000:8a2e:0370:7334"],
-        "MX": ["10 mail.example.com", "20 mail2.example.com"],
-        "TXT": ["v=spf1 include:_spf.example.com ~all", "google-site-verification=abc123"],
-        "CNAME": ["www -> example.com", "blog -> hosting-platform.com"],
-        "NS": ["ns1.digitalocean.com", "ns2.digitalocean.com", "ns3.digitalocean.com"]
-    },
-    "subdomains": ["www", "mail", "blog", "dev", "api", "test", "shop", "support", "forum", "news"],
-    "ssl": {
-        "Issuer": "Let's Encrypt",
-        "Expiration": "2023-12-01",
-        "Algorithm": "SHA-256 with RSA",
-        "Key Size": "2048 bits"
-    },
-    "technologies": {
-        "Web Server": "nginx/1.18.0",
-        "Programming Language": "PHP 8.1.10",
-        "JavaScript Framework": "React 18.2.0",
-        "Database": "MySQL 8.0.30",
-        "CMS": "WordPress 6.0.2"
-    }
-}
-
-social_media_data = {
-    "twitter": {
-        "handle": "@examplecorp",
-        "followers": "12.5K",
-        "following": "327",
-        "joined": "March 2015",
-        "activity": "High (3-5 tweets per day)",
-        "last_tweet": "2023-05-15 14:23:45 UTC",
-        "top_hashtags": ["#tech", "#innovation", "#business"]
-    },
-    "facebook": {
-        "handle": "ExampleCorporation",
-        "followers": "45.2K",
-        "likes": "38.7K",
-        "page_created": "2014-08-12",
-        "page_category": "Technology Company",
-        "verification_status": "Verified"
-    },
-    "linkedin": {
-        "handle": "example-corporation",
-        "employees": "250-500",
-        "industry": "Technology",
-        "company_size": "251-500 employees",
-        "founded": "2013",
-        "specialties": "Software Development, Cloud Computing, AI Solutions"
-    },
-    "instagram": {
-        "handle": "@examplecorp",
-        "followers": "23.4K",
-        "following": "512",
-        "posts": "1,234",
-        "engagement_rate": "4.2%"
-    }
-}
-
-person_data = {
-    "name": "John A. Smith",
-    "email": "john.smith@example.com",
-    "phone": "+1 (555) 123-4567",
-    "locations": ["New York, NY", "San Francisco, CA", "London, UK"],
-    "employment": ["Example Corp (Current) - Senior Developer", "Previous Company Inc - Software Engineer"],
-    "education": ["University of Technology - Computer Science (2010-2014)"],
-    "social_media": {
-        "twitter": "@johnsmith (2.3K followers)",
-        "linkedin": "john-smith-abc123 (500+ connections)",
-        "github": "johnsmith (24 repositories)"
-    },
-    "skills": ["Python", "JavaScript", "React", "Node.js", "Cloud Architecture"],
-    "recent_activity": {
-        "twitter": "Active (5 tweets this week)",
-        "github": "Active (2 commits this week)",
-        "linkedin": "Active (Shared 1 post this week)"
-    }
-}
-
-image_analysis_data = {
-    "basic_info": {
-        "File Type": "JPEG",
-        "Dimensions": "1200x800 pixels",
-        "File Size": "450 KB",
-        "Color Space": "RGB",
-        "Resolution": "72 dpi"
-    },
-    "exif_data": {
-        "Camera Model": "iPhone 12 Pro",
-        "Date Taken": "2023-05-12 14:23:45 UTC",
-        "Exposure": "1/60 sec",
-        "Aperture": "f/1.6",
-        "ISO": "100",
-        "Focal Length": "4.2 mm",
-        "Software": "Adobe Photoshop 2023"
-    },
-    "geolocation": {
-        "Estimated Location": "New York, NY (85% confidence)",
-        "GPS Coordinates": "40.7128° N, 74.0060° W",
-        "Landmarks": "Central Park, Empire State Building"
-    },
-    "advanced_analysis": {
-        "Face Detection": "3 faces identified",
-        "Objects Detected": ["Person", "Building", "Car", "Tree"],
-        "Color Distribution": "Dominant colors: #3A5FCD (blue), #228B22 (green), #8B4513 (brown)",
-        "Edit Detection": "High probability of manipulation (85%)"
-    }
-}
-
-# UI Elements
-class Button:
-    def __init__(self, x, y, width, height, text, color=HIGHLIGHT, hover_color=ACCENT, text_color=WHITE):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
-        self.color = color
-        self.hover_color = hover_color
-        self.text_color = text_color
-        self.is_hovered = False
-        
-    def draw(self, surface):
-        color = self.hover_color if self.is_hovered else self.color
-        pygame.draw.rect(surface, color, self.rect, border_radius=8)
-        pygame.draw.rect(surface, WHITE, self.rect, 2, border_radius=8)
-        
-        text_surf = main_font.render(self.text, True, self.text_color)
-        text_rect = text_surf.get_rect(center=self.rect.center)
-        surface.blit(text_surf, text_rect)
-        
-    def check_hover(self, pos):
-        self.is_hovered = self.rect.collidepoint(pos)
-        return self.is_hovered
-        
-    def check_click(self, pos, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            return self.rect.collidepoint(pos)
-        return False
-
-class InputBox:
-    def __init__(self, x, y, width, height, text='', placeholder='Enter text...'):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
-        self.placeholder = placeholder
-        self.active = False
-        self.color = LIGHT_BG
-        
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self.active = self.rect.collidepoint(event.pos)
-            self.color = WHITE if self.active else LIGHT_BG
-        if event.type == pygame.KEYDOWN:
-            if self.active:
-                if event.key == pygame.K_RETURN:
-                    return self.text
-                elif event.key == pygame.K_BACKSPACE:
-                    self.text = self.text[:-1]
-                else:
-                    self.text += event.unicode
-        return None
-        
-    def draw(self, surface):
-        pygame.draw.rect(surface, self.color, self.rect, border_radius=5)
-        pygame.draw.rect(surface, WHITE, self.rect, 2, border_radius=5)
-        
-        if self.text:
-            text_surf = main_font.render(self.text, True, DARK_BG if self.active else WHITE)
-        else:
-            text_surf = main_font.render(self.placeholder, True, GRAY)
-            
-        surface.blit(text_surf, (self.rect.x + 10, self.rect.y + 10))
-
-class Tab:
-    def __init__(self, x, y, width, height, text, color=BLUE):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
-        self.active = False
-        self.color = color
-        
-    def draw(self, surface):
-        color = self.color if self.active else LIGHT_BG
-        pygame.draw.rect(surface, color, self.rect, border_radius=5)
-        pygame.draw.rect(surface, WHITE, self.rect, 2, border_radius=5)
-        
-        text_surf = main_font.render(self.text, True, WHITE)
-        text_rect = text_surf.get_rect(center=self.rect.center)
-        surface.blit(text_surf, text_rect)
-        
-    def check_click(self, pos, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.rect.collidepoint(pos):
-                self.active = True
-                return True
-        return False
-
-# Create UI elements
-search_box = InputBox(50, 20, 300, 40, '', 'Enter domain, username, or keyword...')
-search_button = Button(360, 20, 100, 40, "Search", GREEN, (0, 230, 120))
-
-tabs = [
-    Tab(50, 80, 120, 40, "Domain Info", BLUE),
-    Tab(180, 80, 120, 40, "Social Media", PURPLE),
-    Tab(310, 80, 120, 40, "People Search", ORANGE),
-    Tab(440, 80, 120, 40, "Image Analysis", GREEN),
-    Tab(570, 80, 120, 40, "Metadata", RED),
-    Tab(700, 80, 120, 40, "Network", YELLOW)
-]
-tabs[0].active = True
-
-action_buttons = [
-    Button(800, 20, 150, 40, "Generate Report", PURPLE, (180, 80, 220)),
-    Button(800, 80, 150, 40, "Save Results", GREEN, (0, 230, 120)),
-    Button(800, 140, 150, 40, "Export Data", BLUE, (30, 170, 255))
-]
-
-subscribe_button = Button(WIDTH//2 - 100, HEIGHT//2 + 50, 200, 50, "Subscribe on YouTube", RED, (255, 50, 50))
-unlock_button = Button(WIDTH//2 - 100, HEIGHT//2 + 120, 200, 50, "Unlock Tool", GREEN, (0, 230, 120))
-
-# Main loop
-clock = pygame.time.Clock()
-current_tab = "Domain Info"
-
-def draw_locked_screen():
-    # Draw background
-    screen.fill(DARK_BG)
+# Check and install required packages
+def check_dependencies():
+    required_packages = ['requests', 'python-whois', 'dnspython']
+    missing_packages = []
     
-    # Draw lock icon
-    lock_rect = pygame.Rect(WIDTH//2 - 50, HEIGHT//2 - 150, 100, 100)
-    pygame.draw.rect(screen, RED, lock_rect, border_radius=15)
-    pygame.draw.rect(screen, WHITE, lock_rect, 3, border_radius=15)
-    
-    # Draw lock shape
-    pygame.draw.rect(screen, WHITE, (WIDTH//2 - 20, HEIGHT//2 - 130, 40, 50), border_radius=5)
-    pygame.draw.circle(screen, WHITE, (WIDTH//2, HEIGHT//2 - 105), 15, 3)
-    
-    # Draw message
-    message = header_font.render("TOOL LOCKED", True, RED)
-    screen.blit(message, (WIDTH//2 - message.get_width()//2, HEIGHT//2 - 200))
-    
-    instruction = main_font.render(subscription_message, True, WHITE)
-    screen.blit(instruction, (WIDTH//2 - instruction.get_width()//2, HEIGHT//2 - 30))
-    
-    # Draw buttons
-    subscribe_button.draw(screen)
-    
-    # Draw footer
-    pygame.draw.rect(screen, LIGHT_BG, (0, HEIGHT - 30, WIDTH, 30))
-    footer_text = small_font.render("HCO OSINT Tool v2.0 | © 2023 Hackers Colony Official | For educational purposes only", True, WHITE)
-    screen.blit(footer_text, (WIDTH // 2 - footer_text.get_width() // 2, HEIGHT - 25))
-
-def draw_countdown_screen():
-    # Draw background
-    screen.fill(DARK_BG)
-    
-    # Calculate remaining time
-    elapsed = time.time() - start_time
-    remaining = max(0, countdown_time - elapsed)
-    
-    # Draw countdown
-    countdown_text = large_font.render(f"{int(remaining)}", True, YELLOW)
-    screen.blit(countdown_text, (WIDTH//2 - countdown_text.get_width()//2, HEIGHT//2 - 50))
-    
-    message = header_font.render("Redirecting to YouTube...", True, WHITE)
-    screen.blit(message, (WIDTH//2 - message.get_width()//2, HEIGHT//2 + 50))
-    
-    instruction = main_font.render("Please subscribe and click the bell icon, then return to unlock the tool", True, WHITE)
-    screen.blit(instruction, (WIDTH//2 - instruction.get_width()//2, HEIGHT//2 + 100))
-    
-    # Draw footer
-    pygame.draw.rect(screen, LIGHT_BG, (0, HEIGHT - 30, WIDTH, 30))
-    footer_text = small_font.render("HCO OSINT Tool v2.0 | © 2023 Hackers Colony Official | For educational purposes only", True, WHITE)
-    screen.blit(footer_text, (WIDTH // 2 - footer_text.get_width() // 2, HEIGHT - 25))
-    
-    return remaining <= 0
-
-def draw_unlock_screen():
-    # Draw background
-    screen.fill(DARK_BG)
-    
-    # Draw success message
-    message = header_font.render("TOOL UNLOCKED!", True, GREEN)
-    screen.blit(message, (WIDTH//2 - message.get_width()//2, HEIGHT//2 - 100))
-    
-    # Draw HCO OSINT by Azhar in bold red inside blue box
-    title_box = pygame.Rect(WIDTH//2 - 200, HEIGHT//2 - 50, 400, 80)
-    pygame.draw.rect(screen, BLUE, title_box, border_radius=10)
-    pygame.draw.rect(screen, WHITE, title_box, 3, border_radius=10)
-    
-    title_text = title_font.render("HCO OSINT by Azhar", True, RED)
-    screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, HEIGHT//2 - 30))
-    
-    instruction = main_font.render("Press any key to continue to the tool...", True, WHITE)
-    screen.blit(instruction, (WIDTH//2 - instruction.get_width()//2, HEIGHT//2 + 50))
-    
-    # Draw footer
-    pygame.draw.rect(screen, LIGHT_BG, (0, HEIGHT - 30, WIDTH, 30))
-    footer_text = small_font.render("HCO OSINT Tool v2.0 | © 2023 Hackers Colony Official | For educational purposes only", True, WHITE)
-    screen.blit(footer_text, (WIDTH // 2 - footer_text.get_width() // 2, HEIGHT - 25))
-
-def draw_domain_info():
-    y_offset = 140
-    # WHOIS Information
-    header = header_font.render("WHOIS Information", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 30
-    
-    for key, value in domain_data["whois"].items():
-        if isinstance(value, list):
-            text = main_font.render(f"{key}: {', '.join(value)}", True, WHITE)
-        else:
-            text = main_font.render(f"{key}: {value}", True, WHITE)
-        screen.blit(text, (70, y_offset))
-        y_offset += 25
-    
-    y_offset += 20
-    # DNS Records
-    header = header_font.render("DNS Records", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 30
-    
-    for record_type, values in domain_data["dns"].items():
-        text = main_font.render(f"{record_type} Records:", True, GREEN)
-        screen.blit(text, (70, y_offset))
-        y_offset += 25
-        for value in values:
-            text = small_font.render(f"  {value}", True, WHITE)
-            screen.blit(text, (90, y_offset))
-            y_offset += 20
-    
-    y_offset += 20
-    # Subdomains
-    header = header_font.render("Discovered Subdomains", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 30
-    
-    subdomain_text = ", ".join(domain_data["subdomains"])
-    text = main_font.render(subdomain_text, True, WHITE)
-    screen.blit(text, (70, y_offset))
-    
-    y_offset += 40
-    # SSL Certificate
-    header = header_font.render("SSL Certificate Information", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 30
-    
-    for key, value in domain_data["ssl"].items():
-        text = main_font.render(f"{key}: {value}", True, WHITE)
-        screen.blit(text, (70, y_offset))
-        y_offset += 25
-    
-    y_offset += 20
-    # Technologies
-    header = header_font.render("Technologies Detected", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 30
-    
-    for key, value in domain_data["technologies"].items():
-        text = main_font.render(f"{key}: {value}", True, WHITE)
-        screen.blit(text, (70, y_offset))
-        y_offset += 25
-
-def draw_social_media():
-    y_offset = 140
-    for platform, data in social_media_data.items():
-        header = header_font.render(platform.capitalize(), True, YELLOW)
-        screen.blit(header, (50, y_offset))
-        y_offset += 30
-        
-        for key, value in data.items():
-            text = main_font.render(f"{key.capitalize()}: {value}", True, WHITE)
-            screen.blit(text, (70, y_offset))
-            y_offset += 25
-        y_offset += 20
-
-def draw_people_search():
-    y_offset = 140
-    header = header_font.render("Person of Interest: John A. Smith", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 40
-    
-    for key, value in person_data.items():
-        if key != "social_media":
-            if isinstance(value, list):
-                text = main_font.render(f"{key.capitalize()}: {', '.join(value)}", True, WHITE)
+    for package in required_packages:
+        try:
+            if package == 'python-whois':
+                import whois
+            elif package == 'dnspython':
+                import dns.resolver
             else:
-                text = main_font.render(f"{key.capitalize()}: {value}", True, WHITE)
-            screen.blit(text, (70, y_offset))
-            y_offset += 30
+                __import__(package)
+        except ImportError:
+            missing_packages.append(package)
     
-    y_offset += 10
-    header = header_font.render("Social Media Profiles", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 30
-    
-    for platform, handle in person_data["social_media"].items():
-        text = main_font.render(f"{platform.capitalize()}: {handle}", True, WHITE)
-        screen.blit(text, (70, y_offset))
-        y_offset += 25
-    
-    y_offset += 10
-    header = header_font.render("Skills & Expertise", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 30
-    
-    skills_text = ", ".join(person_data["skills"])
-    text = main_font.render(skills_text, True, WHITE)
-    screen.blit(text, (70, y_offset))
-    y_offset += 30
-    
-    header = header_font.render("Recent Activity", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 30
-    
-    for platform, activity in person_data["recent_activity"].items():
-        text = main_font.render(f"{platform.capitalize()}: {activity}", True, WHITE)
-        screen.blit(text, (70, y_offset))
-        y_offset += 25
-
-def draw_image_analysis():
-    y_offset = 140
-    
-    for section, data in image_analysis_data.items():
-        header_text = section.replace("_", " ").title()
-        header = header_font.render(header_text, True, YELLOW)
-        screen.blit(header, (50, y_offset))
-        y_offset += 30
+    if missing_packages:
+        print("Installing missing dependencies...")
+        if IS_TERMUX:
+            for package in missing_packages:
+                os.system(f"pip install {package}")
+        else:
+            os.system(f"pip3 install {' '.join(missing_packages)}")
         
-        for key, value in data.items():
-            if isinstance(value, list):
-                text = main_font.render(f"{key}: {', '.join(value)}", True, WHITE)
+        # Check again after installation
+        for package in missing_packages:
+            try:
+                __import__(package.replace('-', '_'))
+            except ImportError:
+                print(f"Failed to install {package}. Please install it manually.")
+                return False
+    return True
+
+# Domain information gathering
+def domain_info_gathering(domain):
+    print(f"\n\033[1;34m[+] Gathering information for: {domain}\033[0m")
+    
+    results = {}
+    
+    # WHOIS lookup
+    try:
+        print("[+] Performing WHOIS lookup...")
+        domain_info = whois.whois(domain)
+        results['whois'] = {
+            'registrar': domain_info.registrar,
+            'creation_date': str(domain_info.creation_date),
+            'expiration_date': str(domain_info.expiration_date),
+            'name_servers': domain_info.name_servers,
+            'emails': domain_info.emails
+        }
+    except Exception as e:
+        results['whois'] = {'error': str(e)}
+    
+    # DNS enumeration
+    try:
+        print("[+] Enumerating DNS records...")
+        dns_results = {}
+        record_types = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME']
+        
+        for record_type in record_types:
+            try:
+                answers = dns.resolver.resolve(domain, record_type)
+                dns_results[record_type] = [str(r) for r in answers]
+            except:
+                dns_results[record_type] = []
+        
+        results['dns'] = dns_results
+    except Exception as e:
+        results['dns'] = {'error': str(e)}
+    
+    # Subdomain enumeration
+    try:
+        print("[+] Searching for subdomains...")
+        subdomains = []
+        common_subdomains = ['www', 'mail', 'ftp', 'localhost', 'webmail', 'smtp', 'pop', 'ns1', 'webdisk', 'cpanel', 
+                            'whm', 'autodiscover', 'autoconfig', 'm', 'imap', 'test', 'ns', 'blog', 'pop3', 'dev',
+                            'www2', 'admin', 'forum', 'news', 'vpn', 'ns2', 'mysql', 'ftp', 'news', 'u', 'email']
+        
+        for sub in common_subdomains:
+            full_domain = f"{sub}.{domain}"
+            try:
+                socket.gethostbyname(full_domain)
+                subdomains.append(full_domain)
+            except socket.gaierror:
+                continue
+        
+        results['subdomains'] = subdomains
+    except Exception as e:
+        results['subdomains'] = {'error': str(e)}
+    
+    # HTTP headers
+    try:
+        print("[+] Analyzing HTTP headers...")
+        url = f"http://{domain}"
+        response = requests.get(url, timeout=10)
+        results['http_headers'] = dict(response.headers)
+    except:
+        try:
+            url = f"https://{domain}"
+            response = requests.get(url, timeout=10, verify=False)
+            results['http_headers'] = dict(response.headers)
+        except Exception as e:
+            results['http_headers'] = {'error': str(e)}
+    
+    return results
+
+# IP information gathering
+def ip_info_gathering(ip):
+    print(f"\n\033[1;34m[+] Gathering information for IP: {ip}\033[0m")
+    
+    results = {}
+    
+    try:
+        # Get IP information from ip-api.com
+        print("[+] Querying IP information...")
+        response = requests.get(f"http://ip-api.com/json/{ip}").json()
+        
+        if response['status'] == 'success':
+            results['ip_info'] = {
+                'country': response['country'],
+                'region': response['regionName'],
+                'city': response['city'],
+                'zip': response['zip'],
+                'lat': response['lat'],
+                'lon': response['lon'],
+                'timezone': response['timezone'],
+                'isp': response['isp'],
+                'org': response['org'],
+                'as': response['as']
+            }
+        else:
+            results['ip_info'] = {'error': 'Failed to get IP information'}
+    except Exception as e:
+        results['ip_info'] = {'error': str(e)}
+    
+    # Reverse DNS lookup
+    try:
+        print("[+] Performing reverse DNS lookup...")
+        hostname = socket.gethostbyaddr(ip)
+        results['reverse_dns'] = hostname[0]
+    except:
+        results['reverse_dns'] = 'Not found'
+    
+    # Check open ports
+    try:
+        print("[+] Scanning for common open ports...")
+        common_ports = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 993, 995, 1723, 3306, 3389, 5900, 8080]
+        open_ports = []
+        
+        for port in common_ports:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            result = sock.connect_ex((ip, port))
+            if result == 0:
+                open_ports.append(port)
+            sock.close()
+        
+        results['open_ports'] = open_ports
+    except Exception as e:
+        results['open_ports'] = {'error': str(e)}
+    
+    return results
+
+# Email information gathering
+def email_info_gathering(email):
+    print(f"\n\033[1;34m[+] Gathering information for email: {email}\033[0m")
+    
+    results = {}
+    
+    # Check if email is valid
+    email_regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+    if not re.search(email_regex, email):
+        results['error'] = 'Invalid email format'
+        return results
+    
+    # Extract domain from email
+    domain = email.split('@')[1]
+    
+    # Get domain information
+    results['domain_info'] = domain_info_gathering(domain)
+    
+    # Check if email exists using haveibeenpwned API (anonymously)
+    try:
+        print("[+] Checking if email was involved in data breaches...")
+        url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}"
+        headers = {'User-Agent': 'HCO-OSINT-Tool'}
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            breaches = response.json()
+            results['breaches'] = [{'Name': b['Name'], 'BreachDate': b['BreachDate']} for b in breaches]
+        else:
+            results['breaches'] = 'No breaches found or API limit exceeded'
+    except Exception as e:
+        results['breaches'] = {'error': str(e)}
+    
+    return results
+
+# Phone number information
+def phone_info_gathering(phone):
+    print(f"\n\033[1;34m[+] Gathering information for phone: {phone}\033[0m")
+    
+    results = {}
+    
+    # Basic validation
+    phone = re.sub(r'\D', '', phone)
+    if len(phone) < 10:
+        results['error'] = 'Invalid phone number'
+        return results
+    
+    # Try to get carrier information
+    try:
+        print("[+] Identifying carrier...")
+        # This is a simple implementation - in a real tool you'd use a proper API
+        carriers = {
+            '130': 'T-Mobile',
+            '131': 'T-Mobile',
+            '132': 'Verizon',
+            '133': 'Sprint',
+            '134': 'AT&T',
+            '135': 'AT&T',
+            '136': 'T-Mobile',
+            '137': 'Verizon',
+            '138': 'Sprint',
+            '139': 'AT&T'
+        }
+        
+        prefix = phone[:3]
+        results['carrier'] = carriers.get(prefix, 'Unknown carrier')
+    except Exception as e:
+        results['carrier'] = {'error': str(e)}
+    
+    # Try to get location based on area code (US only)
+    try:
+        print("[+] Estimating location...")
+        area_codes = {
+            '201': 'New Jersey',
+            '202': 'Washington DC',
+            '203': 'Connecticut',
+            '205': 'Alabama',
+            '206': 'Washington',
+            '212': 'New York',
+            '213': 'California',
+            '214': 'Texas',
+            '215': 'Pennsylvania',
+            '216': 'Ohio',
+            '217': 'Illinois',
+            '218': 'Minnesota',
+            '219': 'Indiana',
+            '224': 'Illinois',
+            '225': 'Louisiana',
+            '228': 'Mississippi',
+            '229': 'Georgia',
+            '231': 'Michigan',
+            '234': 'Ohio',
+            '239': 'Florida',
+            '240': 'Maryland',
+            '248': 'Michigan',
+            '251': 'Alabama',
+            '252': 'North Carolina',
+            '253': 'Washington',
+            '254': 'Texas',
+            '256': 'Alabama',
+            '260': 'Indiana',
+            '262': 'Wisconsin',
+            '267': 'Pennsylvania',
+            '269': 'Michigan',
+            '270': 'Kentucky',
+            '272': 'Pennsylvania',
+            '276': 'Virginia',
+            '281': 'Texas',
+            '301': 'Maryland',
+            '302': 'Delaware',
+            '303': 'Colorado',
+            '304': 'West Virginia',
+            '305': 'Florida',
+            '307': 'Wyoming',
+            '308': 'Nebraska',
+            '309': 'Illinois',
+            '310': 'California',
+            '312': 'Illinois',
+            '313': 'Michigan',
+            '314': 'Missouri',
+            '315': 'New York',
+            '316': 'Kansas',
+            '317': 'Indiana',
+            '318': 'Louisiana',
+            '319': 'Iowa',
+            '320': 'Minnesota',
+            '321': 'Florida',
+            '323': 'California',
+            '325': 'Texas',
+            '330': 'Ohio',
+            '331': 'Illinois',
+            '334': 'Alabama',
+            '336': 'North Carolina',
+            '337': 'Louisiana',
+            '339': 'Massachusetts',
+            '347': 'New York',
+            '351': 'Massachusetts',
+            '352': 'Florida',
+            '360': 'Washington',
+            '361': 'Texas',
+            '385': 'Utah',
+            '386': 'Florida',
+            '401': 'Rhode Island',
+            '402': 'Nebraska',
+            '404': 'Georgia',
+            '405': 'Oklahoma',
+            '406': 'Montana',
+            '407': 'Florida',
+            '408': 'California',
+            '409': 'Texas',
+            '410': 'Maryland',
+            '412': 'Pennsylvania',
+            '413': 'Massachusetts',
+            '414': 'Wisconsin',
+            '415': 'California',
+            '417': 'Missouri',
+            '419': 'Ohio',
+            '423': 'Tennessee',
+            '424': 'California',
+            '425': 'Washington',
+            '430': 'Texas',
+            '432': 'Texas',
+            '434': 'Virginia',
+            '435': 'Utah',
+            '440': 'Ohio',
+            '443': 'Maryland',
+            '445': 'Pennsylvania',
+            '464': 'Illinois',
+            '469': 'Texas',
+            '470': 'Georgia',
+            '475': 'Connecticut',
+            '478': 'Georgia',
+            '479': 'Arkansas',
+            '480': 'Arizona',
+            '484': 'Pennsylvania',
+            '501': 'Arkansas',
+            '502': 'Kentucky',
+            '503': 'Oregon',
+            '504': 'Louisiana',
+            '505': 'New Mexico',
+            '507': 'Minnesota',
+            '508': 'Massachusetts',
+            '509': 'Washington',
+            '510': 'California',
+            '512': 'Texas',
+            '513': 'Ohio',
+            '515': 'Iowa',
+            '516': 'New York',
+            '517': 'Michigan',
+            '518': 'New York',
+            '520': 'Arizona',
+            '530': 'California',
+            '540': 'Virginia',
+            '541': 'Oregon',
+            '551': 'New Jersey',
+            '559': 'California',
+            '561': 'Florida',
+            '562': 'California',
+            '563': 'Iowa',
+            '564': 'Washington',
+            '567': 'Ohio',
+            '570': 'Pennsylvania',
+            '571': 'Virginia',
+            '573': 'Missouri',
+            '574': 'Indiana',
+            '575': 'New Mexico',
+            '580': 'Oklahoma',
+            '585': 'New York',
+            '586': 'Michigan',
+            '601': 'Mississippi',
+            '602': 'Arizona',
+            '603': 'New Hampshire',
+            '605': 'South Dakota',
+            '606': 'Kentucky',
+            '607': 'New York',
+            '608': 'Wisconsin',
+            '609': 'New Jersey',
+            '610': 'Pennsylvania',
+            '612': 'Minnesota',
+            '614': 'Ohio',
+            '615': 'Tennessee',
+            '616': 'Michigan',
+            '617': 'Massachusetts',
+            '618': 'Illinois',
+            '619': 'California',
+            '620': 'Kansas',
+            '623': 'Arizona',
+            '626': 'California',
+            '630': 'Illinois',
+            '631': 'New York',
+            '636': 'Missouri',
+            '641': 'Iowa',
+            '646': 'New York',
+            '650': 'California',
+            '651': 'Minnesota',
+            '657': 'California',
+            '660': 'Missouri',
+            '661': 'California',
+            '662': 'Mississippi',
+            '667': 'Maryland',
+            '669': 'California',
+            '670': 'Northern Mariana Islands',
+            '671': 'Guam',
+            '678': 'Georgia',
+            '681': 'West Virginia',
+            '682': 'Texas',
+            '684': 'American Samoa',
+            '701': 'North Dakota',
+            '702': 'Nevada',
+            '703': 'Virginia',
+            '704': 'North Carolina',
+            '706': 'Georgia',
+            '707': 'California',
+            '708': 'Illinois',
+            '712': 'Iowa',
+            '713': 'Texas',
+            '714': 'California',
+            '715': 'Wisconsin',
+            '716': 'New York',
+            '717': 'Pennsylvania',
+            '718': 'New York',
+            '719': 'Colorado',
+            '720': 'Colorado',
+            '724': 'Pennsylvania',
+            '725': 'Nevada',
+            '727': 'Florida',
+            '731': 'Tennessee',
+            '732': 'New Jersey',
+            '734': 'Michigan',
+            '737': 'Texas',
+            '740': 'Ohio',
+            '747': 'California',
+            '754': 'Florida',
+            '757': 'Virginia',
+            '760': 'California',
+            '762': 'Georgia',
+            '763': 'Minnesota',
+            '765': 'Indiana',
+            '769': 'Mississippi',
+            '770': 'Georgia',
+            '772': 'Florida',
+            '773': 'Illinois',
+            '774': 'Massachusetts',
+            '775': 'Nevada',
+            '779': 'Illinois',
+            '781': 'Massachusetts',
+            '785': 'Kansas',
+            '786': 'Florida',
+            '787': 'Puerto Rico',
+            '801': 'Utah',
+            '802': 'Vermont',
+            '803': 'South Carolina',
+            '804': 'Virginia',
+            '805': 'California',
+            '806': 'Texas',
+            '808': 'Hawaii',
+            '810': 'Michigan',
+            '812': 'Indiana',
+            '813': 'Florida',
+            '814': 'Pennsylvania',
+            '815': 'Illinois',
+            '816': 'Missouri',
+            '817': 'Texas',
+            '818': 'California',
+            '828': 'North Carolina',
+            '830': 'Texas',
+            '831': 'California',
+            '832': 'Texas',
+            '843': 'South Carolina',
+            '845': 'New York',
+            '847': 'Illinois',
+            '848': 'New Jersey',
+            '850': 'Florida',
+            '856': 'New Jersey',
+            '857': 'Massachusetts',
+            '858': 'California',
+            '859': 'Kentucky',
+            '860': 'Connecticut',
+            '862': 'New Jersey',
+            '863': 'Florida',
+            '864': 'South Carolina',
+            '865': 'Tennessee',
+            '870': 'Arkansas',
+            '872': 'Illinois',
+            '878': 'Pennsylvania',
+            '901': 'Tennessee',
+            '903': 'Texas',
+            '904': 'Florida',
+            '906': 'Michigan',
+            '907': 'Alaska',
+            '908': 'New Jersey',
+            '909': 'California',
+            '910': 'North Carolina',
+            '912': 'Georgia',
+            '913': 'Kansas',
+            '914': 'New York',
+            '915': 'Texas',
+            '916': 'California',
+            '917': 'New York',
+            '918': 'Oklahoma',
+            '919': 'North Carolina',
+            '920': 'Wisconsin',
+            '925': 'California',
+            '928': 'Arizona',
+            '931': 'Tennessee',
+            '936': 'Texas',
+            '937': 'Ohio',
+            '939': 'Puerto Rico',
+            '940': 'Texas',
+            '941': 'Florida',
+            '947': 'Michigan',
+            '949': 'California',
+            '951': 'California',
+            '952': 'Minnesota',
+            '954': 'Florida',
+            '956': 'Texas',
+            '957': 'New Mexico',
+            '959': 'Connecticut',
+            '970': 'Colorado',
+            '971': 'Oregon',
+            '972': 'Texas',
+            '973': 'New Jersey',
+            '975': 'Missouri',
+            '978': 'Massachusetts',
+            '979': 'Texas',
+            '980': 'North Carolina',
+            '984': 'North Carolina',
+            '985': 'Louisiana',
+            '989': 'Michigan'
+        }
+        
+        area_code = phone[:3]
+        results['location'] = area_codes.get(area_code, 'Unknown location')
+    except Exception as e:
+        results['location'] = {'error': str(e)}
+    
+    return results
+
+# Save results to file
+def save_results(data, filename):
+    try:
+        with open(filename, 'w') as f:
+            if isinstance(data, dict):
+                json.dump(data, f, indent=4)
             else:
-                text = main_font.render(f"{key}: {value}", True, WHITE)
-            screen.blit(text, (70, y_offset))
-            y_offset += 25
-        y_offset += 20
+                f.write(str(data))
+        print(f"\033[1;32m[+] Results saved to: {filename}\033[0m")
+    except Exception as e:
+        print(f"\033[1;31m[-] Error saving results: {e}\033[0m")
 
-def draw_metadata():
-    y_offset = 140
-    header = header_font.render("Document Metadata Analysis", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 40
+# Main menu
+def main_menu():
+    print_banner()
+    print("\033[1;36m1. Domain Information Gathering")
+    print("2. IP Address Information Gathering")
+    print("3. Email Information Gathering")
+    print("4. Phone Number Information Gathering")
+    print("5. Exit\033[0m")
+    print()
     
-    metadata = [
-        ("Author", "John Smith"),
-        ("Creation Date", "2023-04-15T09:32:15Z"),
-        ("Last Modified", "2023-04-17T14:20:33Z"),
-        ("Software", "Microsoft Word 365"),
-        ("Company", "Example Corp"),
-        ("Edit Time", "2 hours 15 minutes"),
-        ("Template", "Normal.dotm"),
-        ("Word Count", "1,245 words"),
-        ("Revision Number", "7"),
-        ("Last Printed", "2023-04-16T11:45:22Z"),
-        ("Security", "Password protected"),
-        ("Application Version", "16.0.12345.12345")
-    ]
-    
-    for label, value in metadata:
-        text = main_font.render(f"{label}: {value}", True, WHITE)
-        screen.blit(text, (70, y_offset))
-        y_offset += 30
-
-def draw_network():
-    y_offset = 140
-    header = header_font.render("Network Intelligence", True, YELLOW)
-    screen.blit(header, (50, y_offset))
-    y_offset += 40
-    
-    network_info = [
-        ("IP Range", "192.0.2.0 - 192.0.2.255"),
-        ("ASN", "AS12345 (Example Network Solutions)"),
-        ("Hosting Provider", "DigitalOcean, LLC"),
-        ("Data Center", "NYC1 (New York, United States)"),
-        ("Services Detected", "HTTP, HTTPS, SSH, SMTP, FTP"),
-        ("SSL Certificate", "Let's Encrypt (Valid until 2023-12-01)"),
-        ("Technologies", "Nginx, WordPress, PHP 8.1, jQuery, React"),
-        ("Open Ports", "22 (SSH), 80 (HTTP), 443 (HTTPS), 21 (FTP)"),
-        ("Server OS", "Ubuntu 20.04.4 LTS"),
-        ("Response Time", "142 ms"),
-        ("IP Geolocation", "New York, United States"),
-        ("Blacklist Status", "Clean (Not blacklisted)")
-    ]
-    
-    for label, value in network_info:
-        text = main_font.render(f"{label}: {value}", True, WHITE)
-        screen.blit(text, (70, y_offset))
-        y_offset += 30
-
-def draw_ui():
-    # Draw background
-    screen.fill(DARK_BG)
-    
-    # Draw header
-    pygame.draw.rect(screen, LIGHT_BG, (0, 0, WIDTH, 130))
-    
-    # Draw title
-    title = title_font.render("HCO OSINT Investigation Tool", True, WHITE)
-    screen.blit(title, (WIDTH // 2 - title.get_width() // 2, 5))
-    
-    # Draw search box and button
-    search_box.draw(screen)
-    search_button.draw(screen)
-    
-    # Draw tabs
-    for tab in tabs:
-        tab.draw(screen)
-    
-    # Draw action buttons
-    for button in action_buttons:
-        button.draw(screen)
-    
-    # Draw content based on active tab
-    if current_tab == "Domain Info":
-        draw_domain_info()
-    elif current_tab == "Social Media":
-        draw_social_media()
-    elif current_tab == "People Search":
-        draw_people_search()
-    elif current_tab == "Image Analysis":
-        draw_image_analysis()
-    elif current_tab == "Metadata":
-        draw_metadata()
-    elif current_tab == "Network":
-        draw_network()
-    
-    # Draw footer
-    pygame.draw.rect(screen, LIGHT_BG, (0, HEIGHT - 30, WIDTH, 30))
-    footer_text = small_font.render("HCO OSINT Tool v2.0 | © 2023 Hackers Colony Official | For educational purposes only", True, WHITE)
-    screen.blit(footer_text, (WIDTH // 2 - footer_text.get_width() // 2, HEIGHT - 25))
-
-running = True
-while running:
-    mouse_pos = pygame.mouse.get_pos()
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    try:
+        choice = input("\033[1;33mSelect an option (1-5): \033[0m")
         
-        if tool_state == LOCKED:
-            subscribe_button.check_hover(mouse_pos)
-            if subscribe_button.check_click(mouse_pos, event):
-                webbrowser.open(youtube_url)
-                tool_state = COUNTDOWN
-                start_time = time.time()
+        if choice == "1":
+            target = input("Enter domain name (example.com): ").strip()
+            if target:
+                results = domain_info_gathering(target)
+                print("\n\033[1;32m[+] Domain Information Results:\033[0m")
+                print(json.dumps(results, indent=4))
+                
+                # Save results
+                filename = f"domain_{target}_{int(time.time())}.json"
+                save_results(results, filename)
+            else:
+                print("\033[1;31m[-] Please enter a valid domain\033[0m")
         
-        elif tool_state == COUNTDOWN:
-            if draw_countdown_screen():
-                tool_state = SUCCESS
-            pygame.display.flip()
-            continue
+        elif choice == "2":
+            target = input("Enter IP address: ").strip()
+            if target:
+                results = ip_info_gathering(target)
+                print("\n\033[1;32m[+] IP Information Results:\033[0m")
+                print(json.dumps(results, indent=4))
+                
+                # Save results
+                filename = f"ip_{target}_{int(time.time())}.json"
+                save_results(results, filename)
+            else:
+                print("\033[1;31m[-] Please enter a valid IP address\033[0m")
         
-        elif tool_state == SUCCESS:
-            draw_unlock_screen()
-            if event.type == pygame.KEYDOWN:
-                tool_state = UNLOCKED
-            pygame.display.flip()
-            continue
+        elif choice == "3":
+            target = input("Enter email address: ").strip()
+            if target:
+                results = email_info_gathering(target)
+                print("\n\033[1;32m[+] Email Information Results:\033[0m")
+                print(json.dumps(results, indent=4))
+                
+                # Save results
+                filename = f"email_{target}_{int(time.time())}.json"
+                save_results(results, filename)
+            else:
+                print("\033[1;31m[-] Please enter a valid email address\033[0m")
         
-        elif tool_state == UNLOCKED:
-            # Handle input box events
-            result = search_box.handle_event(event)
-            if result:
-                print(f"Searching for: {result}")
-            
-            # Handle button hovers
-            search_button.check_hover(mouse_pos)
-            for button in action_buttons:
-                button.check_hover(mouse_pos)
-            
-            # Handle button clicks
-            if search_button.check_click(mouse_pos, event):
-                print(f"Initiate search for: {search_box.text}")
-            
-            for i, button in enumerate(action_buttons):
-                if button.check_click(mouse_pos, event):
-                    if i == 0:
-                        print("Generating report...")
-                    elif i == 1:
-                        print("Saving results...")
-                    elif i == 2:
-                        print("Exporting data...")
-            
-            # Handle tab clicks
-            for i, tab in enumerate(tabs):
-                if tab.check_click(mouse_pos, event):
-                    current_tab = tab.text
-                    for other_tab in tabs:
-                        if other_tab != tab:
-                            other_tab.active = False
+        elif choice == "4":
+            target = input("Enter phone number: ").strip()
+            if target:
+                results = phone_info_gathering(target)
+                print("\n\033[1;32m[+] Phone Information Results:\033[0m")
+                print(json.dumps(results, indent=4))
+                
+                # Save results
+                filename = f"phone_{target}_{int(time.time())}.json"
+                save_results(results, filename)
+            else:
+                print("\033[1;31m[-] Please enter a valid phone number\033[0m")
+        
+        elif choice == "5":
+            print("\033[1;32m[+] Thank you for using HCO OSINT Tool. Goodbye!\033[0m")
+            sys.exit(0)
+        
+        else:
+            print("\033[1;31m[-] Invalid option. Please try again.\033[0m")
     
-    # Draw the appropriate screen based on tool state
-    if tool_state == LOCKED:
-        draw_locked_screen()
-    elif tool_state == COUNTDOWN:
-        draw_countdown_screen()
-    elif tool_state == SUCCESS:
-        draw_unlock_screen()
-    elif tool_state == UNLOCKED:
-        draw_ui()
-    
-    pygame.display.flip()
-    clock.tick(60)
+    except KeyboardInterrupt:
+        print("\n\033[1;32m[+] Operation cancelled by user. Exiting...\033[0m")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\033[1;31m[-] An error occurred: {e}\033[0m")
 
-pygame.quit()
-sys.exit()
+# Main function
+def main():
+    # Check dependencies
+    if not check_dependencies():
+        print("\033[1;31m[-] Failed to install required dependencies. Exiting...\033[0m")
+        sys.exit(1)
+    
+    # Main loop
+    while True:
+        main_menu()
+        print()
+        input("\033[1;33mPress Enter to continue...\033[0m")
+
+if __name__ == "__main__":
+    main()
