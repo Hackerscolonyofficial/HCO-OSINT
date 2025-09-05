@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-HCO OSINT Tool - Advanced Open Source Intelligence Tool
-With authentication system, countdown, and YouTube redirection
+HCO OSINT Tool - Enhanced with Authentication System
+Countdown, YouTube redirection, and advanced OSINT features
 """
 
 import os
@@ -14,8 +14,7 @@ import whois
 import dns.resolver
 from urllib.parse import urlparse
 import re
-import threading
-from datetime import datetime
+import subprocess
 
 # Check if running on Termux
 IS_TERMUX = os.path.exists('/data/data/com.termux/files/usr')
@@ -41,8 +40,6 @@ SUCCESS = 3
 
 # Initialize tool state
 tool_state = LOCKED
-countdown_time = 10  # seconds
-start_time = 0
 youtube_url = "https://www.youtube.com/channel/UC9P7GSPQpPxjc6Uu-cx-F8w"
 
 # Check and install required packages
@@ -81,16 +78,15 @@ def check_dependencies():
 # Authentication system
 def show_lock_screen():
     os.system('clear')
-    print(f"\n{Colors.RED}{Colors.BOLD}╔{'═'*60}╗{Colors.END}")
-    print(f"{Colors.RED}{Colors.BOLD}║{'TOOL IS LOCKED! 🔐':^60}║{Colors.END}")
-    print(f"{Colors.RED}{Colors.BOLD}║{'═'*60}║{Colors.END}")
-    print(f"{Colors.RED}{Colors.BOLD}║{'Subscribe to our YouTube channel and':^60}║{Colors.END}")
-    print(f"{Colors.RED}{Colors.BOLD}║{'click the bell icon to unlock the tool! 🔓':^60}║{Colors.END}")
-    print(f"{Colors.RED}{Colors.BOLD}║{'═'*60}║{Colors.END}")
-    print(f"{Colors.RED}{Colors.BOLD}║{'YouTube: Hackers Colony Official':^60}║{Colors.END}")
-    print(f"{Colors.RED}{Colors.BOLD}╚{'═'*60}╝{Colors.END}")
-    print(f"\n{Colors.CYAN}1. Subscribe on YouTube")
-    print(f"2. I've already subscribed (Unlock)")
+    print(f"\n{Colors.RED}{Colors.BOLD}╔{'═'*70}╗{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'TOOL IS LOCKED 🔐':^70}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'═'*70}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'Subscribe and click on the bell icon to unlock the tool 🔥':^70}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'═'*70}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}║{'YouTube: Hackers Colony Official':^70}║{Colors.END}")
+    print(f"{Colors.RED}{Colors.BOLD}╚{'═'*70}╝{Colors.END}")
+    print(f"\n{Colors.CYAN}1. Subscribe on YouTube (Countdown & Redirect)")
+    print(f"2. I've already subscribed (Unlock Now)")
     print(f"3. Exit{Colors.END}")
     
     try:
@@ -102,49 +98,53 @@ def show_lock_screen():
 
 def show_countdown():
     os.system('clear')
-    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*60}╗{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}║{'REDIRECTING TO YOUTUBE...':^60}║{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*60}╝{Colors.END}")
+    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*70}╗{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}║{'PREPARING TO REDIRECT TO YOUTUBE...':^70}║{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*70}╝{Colors.END}")
+    
+    # Countdown animation from 9 to 1
+    print(f"\n{Colors.GREEN}{Colors.BOLD}Please subscribe and click the bell icon!{Colors.END}")
+    print(f"{Colors.YELLOW}Redirecting to YouTube in:{Colors.END}")
+    print()
+    
+    for i in range(9, 0, -1):
+        print(f"{Colors.RED}{Colors.BOLD}🔔 {i} {'!'*i}{' '*(9-i)} {Colors.END}", end='\r')
+        time.sleep(1)
+    
+    print(f"{Colors.RED}{Colors.BOLD}🔔 0 !!!!!!!!! {Colors.END}")
+    print(f"\n{Colors.GREEN}Redirecting to YouTube...{Colors.END}")
     
     # Open YouTube channel
     try:
-        import webbrowser
-        webbrowser.open(youtube_url)
-        print(f"{Colors.GREEN}✓ YouTube channel opened in browser{Colors.END}")
-    except:
+        if IS_TERMUX:
+            # On Termux, try to open in default browser
+            os.system(f"termux-open-url '{youtube_url}'")
+        else:
+            # On other systems, use webbrowser module
+            import webbrowser
+            webbrowser.open(youtube_url)
+        print(f"{Colors.GREEN}✓ YouTube channel opened!{Colors.END}")
+    except Exception as e:
         print(f"{Colors.YELLOW}Please visit: {youtube_url}{Colors.END}")
+        print(f"{Colors.RED}Error: {e}{Colors.END}")
     
-    # Countdown animation
-    print(f"\n{Colors.GREEN}{Colors.BOLD}Please subscribe and click the bell icon!{Colors.END}")
-    print(f"{Colors.YELLOW}Return to this tool after subscribing.{Colors.END}")
-    print()
-    
-    for i in range(countdown_time, 0, -1):
-        minutes = i // 60
-        seconds = i % 60
-        countdown_str = f"{minutes:02d}:{seconds:02d}"
-        
-        print(f"{Colors.RED}{Colors.BOLD}⏰ Time remaining: {countdown_str}{Colors.END}", end='\r')
-        time.sleep(1)
-    
-    print(f"{Colors.RED}{Colors.BOLD}⏰ Time remaining: 00:00{' '*10}{Colors.END}")
     return True
 
 def show_unlock_screen():
     os.system('clear')
-    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*60}╗{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}║{'TOOL UNLOCKED! 🔓':^60}║{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*60}╝{Colors.END}")
+    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*70}╗{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}║{'TOOL UNLOCKED SUCCESSFULLY! 🔓':^70}║{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*70}╝{Colors.END}")
     
     # Draw blue box with red text
-    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*40}╗{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}║{Colors.RED}{'HCO OSINT by Azhar':^40}{Colors.BLUE}║{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*40}╝{Colors.END}")
+    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*50}╗{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}║{Colors.RED}{Colors.BOLD}{'HCO OSINT by Azhar':^50}{Colors.BLUE}║{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*50}╝{Colors.END}")
     
     print(f"\n{Colors.GREEN}{Colors.BOLD}Thank you for subscribing!{Colors.END}")
-    print(f"{Colors.CYAN}You now have full access to the HCO OSINT Tool.{Colors.END}")
+    print(f"{Colors.CYAN}You now have full access to advanced OSINT tools.{Colors.END}")
     
-    input(f"\n{Colors.YELLOW}Press Enter to continue...{Colors.END}")
+    input(f"\n{Colors.YELLOW}Press Enter to continue to the main menu...{Colors.END}")
     return True
 
 # Advanced OSINT functions
@@ -153,76 +153,70 @@ def advanced_domain_info(domain):
     
     results = {}
     
-    # WHOIS lookup with more details
+    # WHOIS lookup
     try:
-        print(f"{Colors.YELLOW}[+] Performing comprehensive WHOIS lookup...{Colors.END}")
+        print(f"{Colors.YELLOW}[+] Performing WHOIS lookup...{Colors.END}")
         domain_info = whois.whois(domain)
         results['whois'] = {
             'registrar': domain_info.registrar,
             'creation_date': str(domain_info.creation_date),
             'expiration_date': str(domain_info.expiration_date),
-            'updated_date': str(domain_info.updated_date),
             'name_servers': domain_info.name_servers,
             'status': domain_info.status,
-            'emails': domain_info.emails,
-            'dnssec': domain_info.dnssec,
-            'name': domain_info.name,
-            'org': domain_info.org,
-            'address': domain_info.address,
-            'city': domain_info.city,
-            'state': domain_info.state,
-            'zipcode': domain_info.zipcode,
-            'country': domain_info.country
+            'emails': domain_info.emails
         }
+        print(f"{Colors.GREEN}✓ WHOIS information retrieved{Colors.END}")
     except Exception as e:
         results['whois'] = {'error': str(e)}
+        print(f"{Colors.RED}✗ WHOIS lookup failed: {e}{Colors.END}")
     
-    # Comprehensive DNS enumeration
+    # DNS enumeration
     try:
-        print(f"{Colors.YELLOW}[+] Enumerating all DNS records...{Colors.END}")
+        print(f"{Colors.YELLOW}[+] Enumerating DNS records...{Colors.END}")
         dns_results = {}
-        record_types = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME', 'SOA', 'SRV']
+        record_types = ['A', 'AAAA', 'MX', 'NS', 'TXT', 'CNAME']
         
         for record_type in record_types:
             try:
                 answers = dns.resolver.resolve(domain, record_type)
                 dns_results[record_type] = [str(r) for r in answers]
-            except:
+                print(f"{Colors.GREEN}✓ {record_type} records found: {len(answers)}{Colors.END}")
+            except Exception as e:
                 dns_results[record_type] = []
+                print(f"{Colors.YELLOW}⚠ No {record_type} records found{Colors.END}")
         
         results['dns'] = dns_results
     except Exception as e:
         results['dns'] = {'error': str(e)}
+        print(f"{Colors.RED}✗ DNS enumeration failed: {e}{Colors.END}")
     
     # Subdomain enumeration
     try:
-        print(f"{Colors.YELLOW}[+] Advanced subdomain enumeration...{Colors.END}")
+        print(f"{Colors.YELLOW}[+] Searching for subdomains...{Colors.END}")
         subdomains = []
-        common_subdomains = [
-            'www', 'mail', 'ftp', 'webmail', 'smtp', 'pop', 'ns1', 
-            'webdisk', 'cpanel', 'whm', 'autodiscover', 'dev', 'test',
-            'blog', 'api', 'secure', 'admin', 'forum', 'news', 'vpn',
-            'ns2', 'mysql', 'email', 'shop', 'portal', 'cloud', 'cdn',
-            'static', 'media', 'download', 'uploads', 'server', 'proxy',
-            'firewall', 'router', 'network', 'internal', 'external'
-        ]
+        common_subdomains = ['www', 'mail', 'ftp', 'webmail', 'smtp', 'pop', 'ns1', 
+                            'webdisk', 'cpanel', 'whm', 'autodiscover', 'dev', 'test',
+                            'blog', 'api', 'secure', 'admin', 'forum', 'news', 'vpn',
+                            'ns2', 'mysql', 'email', 'shop', 'portal', 'cloud', 'cdn']
         
         for sub in common_subdomains:
             full_domain = f"{sub}.{domain}"
             try:
                 socket.gethostbyname(full_domain)
                 subdomains.append(full_domain)
-                print(f"{Colors.GREEN}[+] Found subdomain: {full_domain}{Colors.END}")
+                print(f"{Colors.GREEN}✓ Found subdomain: {full_domain}{Colors.END}")
             except socket.gaierror:
                 continue
         
         results['subdomains'] = subdomains
+        print(f"{Colors.GREEN}✓ Found {len(subdomains)} subdomains{Colors.END}")
     except Exception as e:
         results['subdomains'] = {'error': str(e)}
+        print(f"{Colors.RED}✗ Subdomain enumeration failed: {e}{Colors.END}")
     
-    # HTTP headers and security analysis
+    # HTTP headers analysis
     try:
-        print(f"{Colors.YELLOW}[+] Analyzing HTTP headers and security...{Colors.END}")
+        print(f"{Colors.YELLOW}[+] Analyzing HTTP headers...{Colors.END}")
         headers_results = {}
         
         for protocol in ['http', 'https']:
@@ -232,20 +226,17 @@ def advanced_domain_info(domain):
                 headers_results[protocol] = {
                     'status_code': response.status_code,
                     'server': response.headers.get('Server', 'Unknown'),
-                    'x-powered-by': response.headers.get('X-Powered-By', 'Unknown'),
-                    'security_headers': {
-                        'strict-transport-security': response.headers.get('Strict-Transport-Security', 'Missing'),
-                        'x-frame-options': response.headers.get('X-Frame-Options', 'Missing'),
-                        'x-content-type-options': response.headers.get('X-Content-Type-Options', 'Missing'),
-                        'x-xss-protection': response.headers.get('X-XSS-Protection', 'Missing'),
-                    }
+                    'x_powered_by': response.headers.get('X-Powered-By', 'Unknown'),
                 }
-            except:
-                headers_results[protocol] = {'error': f'Could not connect via {protocol}'}
+                print(f"{Colors.GREEN}✓ {protocol.upper()} headers analyzed{Colors.END}")
+            except Exception as e:
+                headers_results[protocol] = {'error': f'Could not connect via {protocol}: {str(e)}'}
+                print(f"{Colors.YELLOW}⚠ Could not connect via {protocol}{Colors.END}")
         
         results['http_analysis'] = headers_results
     except Exception as e:
         results['http_analysis'] = {'error': str(e)}
+        print(f"{Colors.RED}✗ HTTP analysis failed: {e}{Colors.END}")
     
     return results
 
@@ -255,8 +246,8 @@ def advanced_ip_info(ip):
     results = {}
     
     try:
-        # Get detailed IP information from ip-api.com
-        print(f"{Colors.YELLOW}[+] Querying detailed IP information...{Colors.END}")
+        # Get IP information from ip-api.com
+        print(f"{Colors.YELLOW}[+] Querying IP information...{Colors.END}")
         response = requests.get(f"http://ip-api.com/json/{ip}").json()
         
         if response['status'] == 'success':
@@ -272,16 +263,19 @@ def advanced_ip_info(ip):
                 'org': response.get('org', 'Unknown'),
                 'as': response.get('as', 'Unknown')
             }
+            print(f"{Colors.GREEN}✓ IP information retrieved{Colors.END}")
         else:
             results['ip_info'] = {'error': 'Failed to get IP information'}
+            print(f"{Colors.RED}✗ IP information query failed{Colors.END}")
     except Exception as e:
         results['ip_info'] = {'error': str(e)}
+        print(f"{Colors.RED}✗ IP information query failed: {e}{Colors.END}")
     
-    # Advanced port scanning
+    # Port scanning
     try:
-        print(f"{Colors.YELLOW}[+] Performing advanced port scan...{Colors.END}")
+        print(f"{Colors.YELLOW}[+] Scanning for common open ports...{Colors.END}")
         common_ports = [21, 22, 23, 25, 53, 80, 110, 135, 139, 143, 443, 445, 
-                        993, 995, 1723, 3306, 3389, 5900, 8080, 8443]
+                        993, 995, 1723, 3306, 3389, 5900, 8080]
         open_ports = []
         
         for port in common_ports:
@@ -291,14 +285,16 @@ def advanced_ip_info(ip):
                 result = sock.connect_ex((ip, port))
                 if result == 0:
                     open_ports.append(port)
-                    print(f"{Colors.GREEN}[+] Open port found: {port}{Colors.END}")
+                    print(f"{Colors.GREEN}✓ Open port found: {port}{Colors.END}")
                 sock.close()
             except:
                 pass
         
         results['open_ports'] = open_ports
+        print(f"{Colors.GREEN}✓ Found {len(open_ports)} open ports{Colors.END}")
     except Exception as e:
         results['open_ports'] = {'error': str(e)}
+        print(f"{Colors.RED}✗ Port scanning failed: {e}{Colors.END}")
     
     return results
 
@@ -311,43 +307,37 @@ def advanced_email_info(email):
     email_regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
     if not re.search(email_regex, email):
         results['error'] = 'Invalid email format'
+        print(f"{Colors.RED}✗ Invalid email format{Colors.END}")
         return results
     
     # Extract domain from email
     domain = email.split('@')[1]
     
-    # Get comprehensive domain information
+    # Get domain information
+    print(f"{Colors.YELLOW}[+] Analyzing email domain: {domain}{Colors.END}")
     results['domain_info'] = advanced_domain_info(domain)
     
-    # Advanced email verification
+    # Check data breaches
     try:
-        print(f"{Colors.YELLOW}[+] Performing advanced email verification...{Colors.END}")
-        
-        # Check if email was involved in data breaches
         print(f"{Colors.YELLOW}[+] Checking data breaches...{Colors.END}")
-        try:
-            # Using haveibeenpwned API
-            headers = {'User-Agent': 'HCO-OSINT-Tool-v2.0'}
-            hibp_response = requests.get(f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}", headers=headers, timeout=10)
-            
-            if hibp_response.status_code == 200:
-                breaches = hibp_response.json()
-                results['breaches'] = [{
-                    'Name': b.get('Name', 'Unknown'),
-                    'Title': b.get('Title', 'Unknown'),
-                    'Domain': b.get('Domain', 'Unknown'),
-                    'BreachDate': b.get('BreachDate', 'Unknown'),
-                    'AddedDate': b.get('AddedDate', 'Unknown'),
-                    'PwnCount': b.get('PwnCount', 'Unknown'),
-                    'Description': b.get('Description', 'Unknown'),
-                } for b in breaches]
-            else:
-                results['breaches'] = 'No breaches found or API limit exceeded'
-        except Exception as e:
-            results['breaches'] = {'error': str(e)}
+        headers = {'User-Agent': 'HCO-OSINT-Tool'}
+        response = requests.get(f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}", headers=headers, timeout=10)
         
+        if response.status_code == 200:
+            breaches = response.json()
+            results['breaches'] = [{
+                'Name': b.get('Name', 'Unknown'),
+                'Title': b.get('Title', 'Unknown'),
+                'BreachDate': b.get('BreachDate', 'Unknown'),
+                'PwnCount': b.get('PwnCount', 'Unknown'),
+            } for b in breaches]
+            print(f"{Colors.GREEN}✓ Found {len(breaches)} data breaches{Colors.END}")
+        else:
+            results['breaches'] = 'No breaches found'
+            print(f"{Colors.GREEN}✓ No data breaches found{Colors.END}")
     except Exception as e:
-        results['email_validation'] = {'error': str(e)}
+        results['breaches'] = {'error': str(e)}
+        print(f"{Colors.YELLOW}⚠ Data breach check failed: {e}{Colors.END}")
     
     return results
 
@@ -360,15 +350,17 @@ def save_results(data, filename):
             else:
                 f.write(str(data))
         print(f"{Colors.GREEN}[+] Results saved to: {filename}{Colors.END}")
+        return True
     except Exception as e:
         print(f"{Colors.RED}[-] Error saving results: {e}{Colors.END}")
+        return False
 
 # Main menu
 def main_menu():
     os.system('clear')
-    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*60}╗{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}║{'HCO OSINT TOOL - MAIN MENU':^60}║{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*60}╝{Colors.END}")
+    print(f"\n{Colors.BLUE}{Colors.BOLD}╔{'═'*70}╗{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}║{'HCO OSINT TOOL - MAIN MENU':^70}║{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}╚{'═'*70}╝{Colors.END}")
     
     print(f"\n{Colors.CYAN}{Colors.BOLD}1. Advanced Domain Information Gathering")
     print(f"2. Advanced IP Address Information Gathering")
@@ -384,7 +376,7 @@ def main_menu():
         
         if choice == "1":
             target = input("Enter domain name (example.com): ").strip()
-            if target:
+            if target and "." in target:
                 results = advanced_domain_info(target)
                 print(f"\n{Colors.GREEN}{Colors.BOLD}[+] Domain Information Results:{Colors.END}")
                 print(json.dumps(results, indent=4))
@@ -393,11 +385,11 @@ def main_menu():
                 filename = f"domain_{target}_{int(time.time())}.json"
                 save_results(results, filename)
             else:
-                print(f"{Colors.RED}[-] Please enter a valid domain{Colors.END}")
+                print(f"{Colors.RED}[-] Please enter a valid domain name{Colors.END}")
         
         elif choice == "2":
             target = input("Enter IP address: ").strip()
-            if target:
+            if target and re.match(r'^\d+\.\d+\.\d+\.\d+$', target):
                 results = advanced_ip_info(target)
                 print(f"\n{Colors.GREEN}{Colors.BOLD}[+] IP Information Results:{Colors.END}")
                 print(json.dumps(results, indent=4))
@@ -410,7 +402,7 @@ def main_menu():
         
         elif choice == "3":
             target = input("Enter email address: ").strip()
-            if target:
+            if target and "@" in target:
                 results = advanced_email_info(target)
                 print(f"\n{Colors.GREEN}{Colors.BOLD}[+] Email Information Results:{Colors.END}")
                 print(json.dumps(results, indent=4))
