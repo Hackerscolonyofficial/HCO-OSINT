@@ -21,17 +21,16 @@ Hackers Colony or Azhar will not be responsible for any misuse.
 import os
 import sys
 import time
-import requests
-import webbrowser
-from colorama import Fore, Style, init
 import socket
+import webbrowser
+import requests
+from colorama import Fore, Style, init
 import dns.resolver
 import whois
 from ipwhois import IPWhois
 
 # Initialize colorama
 init(autoreset=True)
-
 UNLOCK_FILE = os.path.expanduser("~/.hco_osint_unlock")
 
 # ---------- Unlock / YouTube Redirect ----------
@@ -80,7 +79,7 @@ def domain_lookup():
     domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
     try:
         w = whois.whois(domain)
-        print(Fore.GREEN + "\n[+] WHOIS Lookup Results:\n")
+        print(Fore.GREEN + "\n[+] Domain/WHOIS Lookup Results:\n")
         for key, value in w.items():
             print(f"{Fore.YELLOW}{key:<15}: {Fore.WHITE}{value}")
     except:
@@ -97,15 +96,16 @@ def headers_lookup():
         print(Fore.RED + "Error in HTTP Headers Lookup")
 
 def phone_lookup():
-    from urllib.parse import quote
-    api_key = "f97bc3bedb2944e8b16c02d76680fd44"  # Abstract API free tier
     number = input(Fore.CYAN + "\n[?] Enter Phone Number (with country code): ")
     try:
-        r = requests.get(f"https://phonevalidation.abstractapi.com/v1/?api_key={api_key}&phone={quote(number)}").json()
-        print(Fore.GREEN + "\n[+] Phone Lookup Results:\n")
-        print(F"{Fore.YELLOW}Carrier      : {Fore.WHITE}{r.get('carrier', 'N/A')}")
-        print(F"{Fore.YELLOW}Location     : {Fore.WHITE}{r.get('location', 'N/A')}")
-        print(F"{Fore.YELLOW}Line Type    : {Fore.WHITE}{r.get('line_type', 'N/A')}")
+        if number.startswith('+'):
+            country = number[1:4]
+            print(Fore.GREEN + "\n[+] Phone Lookup Results:\n")
+            print(f"{Fore.YELLOW}Country Code : {Fore.WHITE}{country}")
+            print(f"{Fore.YELLOW}Carrier      : {Fore.WHITE}N/A")
+            print(f"{Fore.YELLOW}Line Type    : {Fore.WHITE}N/A")
+        else:
+            print(Fore.RED + "Invalid number format. Include country code e.g. +918340246110")
     except:
         print(Fore.RED + "Error in Phone Lookup")
 
@@ -154,8 +154,7 @@ def reverse_ip():
         obj = IPWhois(ip)
         res = obj.lookup_rdap()
         print(Fore.GREEN + "\n[+] Reverse IP Results:\n")
-        for k, v in res.items():
-            print(f"{Fore.YELLOW}{k:<15}: {Fore.WHITE}{v}")
+        print(f"{Fore.WHITE}{res.get('network', res)}")
     except:
         print(Fore.RED + "Error in Reverse IP Lookup")
 
@@ -179,9 +178,17 @@ def geoip_lookup():
 def port_scan():
     host = input(Fore.CYAN + "\n[?] Enter Host/IP: ")
     try:
-        r = requests.get(f"https://api.hackertarget.com/nmap/?q={host}")
-        print(Fore.GREEN + "\n[+] Port Scan Results:\n")
-        print(Fore.WHITE + r.text)
+        print(Fore.GREEN + "\n[+] Scanning common ports...\n")
+        common_ports = [21,22,23,25,53,80,110,443,445,3389]
+        for port in common_ports:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(0.5)
+            result = sock.connect_ex((host, port))
+            if result == 0:
+                print(f"{Fore.YELLOW}Port {port:<5}: {Fore.WHITE}Open")
+            else:
+                print(f"{Fore.YELLOW}Port {port:<5}: {Fore.WHITE}Closed")
+            sock.close()
     except:
         print(Fore.RED + "Error in Port Scan")
 
@@ -211,7 +218,6 @@ def main():
     while True:
         menu()
         choice = input(Fore.YELLOW + "[?] Select option: ")
-
         if choice == "1": ip_lookup()
         elif choice == "2": domain_lookup()
         elif choice == "3": headers_lookup()
@@ -219,7 +225,7 @@ def main():
         elif choice == "5": email_lookup()
         elif choice == "6": username_lookup()
         elif choice == "7": dns_lookup()
-        elif choice == "8": domain_lookup()
+        elif choice == "8": domain_lookup()  # WHOIS same as domain
         elif choice == "9": subdomain_scan()
         elif choice == "10": reverse_ip()
         elif choice == "11": trace_route()
@@ -230,7 +236,6 @@ def main():
             sys.exit()
         else:
             print(Fore.RED + "Invalid Choice!")
-
         input(Fore.CYAN + "\nPress Enter to continue...")
 
 if __name__ == "__main__":
