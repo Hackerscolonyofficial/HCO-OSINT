@@ -52,18 +52,30 @@ def unlock():
 
     os.system("clear")
     print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════════════════════")
-    print(Fore.RED + Style.BRIGHT + "       🔒 HCO-OSINT Tool Locked 🔒")
+    print(Fore.RED + Style.BRIGHT + "                🔒 TOOL IS LOCKED 🔒                 ")
     print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════════════════════")
-    print(Fore.CYAN + "You must subscribe to Hackers Colony Tech")
-    print(Fore.CYAN + "and click the bell 🔔 to unlock the tool.")
-    print(Fore.YELLOW + "\nWe will redirect you to our YouTube channel")
-    print(Fore.YELLOW + "Subscribe and click the bell icon to unlock the tool")
-    print(Fore.RED + Style.BRIGHT + "\n══════════════════════════════════════════════════════")
+    print(Fore.CYAN + "  You must subscribe to Hackers Colony Tech")
+    print(Fore.CYAN + "  and click the bell 🔔 icon to unlock the tool")
+    print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════════════════════")
+    print(Fore.YELLOW + "  We will redirect you to our YouTube channel")
+    print(Fore.YELLOW + "  Subscribe and click the bell icon to unlock 🔓 the tool")
+    print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════════════════════")
     
+    # Countdown with red numbers
+    print(Fore.RED + Style.BRIGHT + "\n  Redirecting in: ")
     for i in range(9, 0, -1):
-        print(Fore.YELLOW + f"Redirecting in {i} seconds...", end="\r")
+        if i > 5:
+            color = Fore.RED
+        elif i > 2:
+            color = Fore.YELLOW
+        else:
+            color = Fore.GREEN
+            
+        print(color + Style.BRIGHT + f"  {i}", end=" ", flush=True)
         time.sleep(1)
-
+    
+    print(Fore.GREEN + Style.BRIGHT + " 0")
+    
     try:
         os.system("termux-open-url 'https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya'")
     except:
@@ -203,11 +215,13 @@ def email_lookup():
     print(Fore.GREEN + f"\n[+] Email Lookup Results for {email}:\n")
     
     try:
-        # MX Records with custom resolver
+        # MX Records with custom resolver - FIXED DNS ISSUE
         print(Fore.YELLOW + "[*] Checking MX records...")
         try:
+            # Create a resolver with public DNS servers
             resolver = dns.resolver.Resolver()
-            resolver.nameservers = ['8.8.8.8', '1.1.1.1']  # Google and Cloudflare DNS
+            resolver.nameservers = ['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1']  # Google and Cloudflare DNS
+            
             answers = resolver.resolve(domain, 'MX')
             print(Fore.GREEN + "[+] MX Records found:")
             for rdata in answers:
@@ -217,14 +231,24 @@ def email_lookup():
         except dns.resolver.NXDOMAIN:
             print(Fore.RED + f"[-] Domain {domain} does not exist")
         except Exception as e:
-            print(Fore.RED + f"[-] Error checking MX records: {e}")
+            print(Fore.RED + f"[-] Error checking MX records: {str(e)}")
+            
+        # Check if domain exists
+        print(Fore.YELLOW + "[*] Checking domain information...")
+        try:
+            # Try to get A record
+            a_records = resolver.resolve(domain, 'A')
+            print(Fore.GREEN + f"[+] Domain is active with {len(a_records)} IP addresses")
+        except:
+            print(Fore.RED + "[-] Domain may not be active")
             
         # Email breach check (simulated)
         print(Fore.YELLOW + "[*] Checking for data breaches...")
         print(Fore.YELLOW + "[i] This would check HaveIBeenPwned in full version")
+        print(Fore.YELLOW + "[i] For full breach checking, API key is required")
         
     except Exception as e:
-        print(Fore.RED + f"[-] Error: {e}")
+        print(Fore.RED + f"[-] Error: {str(e)}")
 
 def username_lookup():
     username = input(Fore.CYAN + "\n[?] Enter Username: ").strip()
@@ -257,8 +281,9 @@ def dns_lookup():
         print(Fore.GREEN + f"\n[+] DNS Records for {domain}:\n")
         
         record_types = ['A', 'AAAA', 'MX', 'NS', 'TXT']
+        # Use public DNS servers to avoid resolv.conf issues
         resolver = dns.resolver.Resolver()
-        resolver.nameservers = ['8.8.8.8', '1.1.1.1']
+        resolver.nameservers = ['8.8.8.8', '8.8.4.4', '1.1.1.1', '1.0.0.1']
         
         for record_type in record_types:
             try:
