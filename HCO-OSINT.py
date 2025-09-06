@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ══════════════════════════════════════════════════════
 🚀🔍 HCO-OSINT - Advanced OSINT Tool by Azhar 🔍🚀
@@ -12,8 +11,8 @@
 🎭 Discord : https://discord.gg/Xpq9nCGD
 
 Disclaimer ⚠️  
-This tool is made for **educational and research purposes only**.
-Hackers Colony or Azhar will not be responsible for misuse.
+This tool is made for **educational and research purposes only**.  
+Hackers Colony or Azhar will not be responsible for any misuse.  
 
 ✨ Code by Azhar (Hackers Colony)
 ══════════════════════════════════════════════════════
@@ -24,11 +23,11 @@ import sys
 import time
 import requests
 import webbrowser
-import socket
-import whois
-import dns.resolver
-from ipwhois import IPWhois
 from colorama import Fore, Style, init
+import socket
+import dns.resolver
+import whois
+from ipwhois import IPWhois
 
 # Initialize colorama
 init(autoreset=True)
@@ -45,10 +44,13 @@ def unlock():
     print(Fore.CYAN + "You must subscribe to Hackers Colony Tech")
     print(Fore.CYAN + "and click the bell 🔔 to unlock the tool.")
     print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════\n")
+    # Countdown
     for i in range(8, 0, -1):
         print(Fore.YELLOW + Style.BRIGHT + f"Redirecting to YouTube in {i} seconds...", end="\r")
         time.sleep(1)
-    webbrowser.open("https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya")
+    # Open YouTube channel
+    youtube_link = "https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya"
+    webbrowser.open(youtube_link)
     input(Fore.GREEN + "\nPress Enter after subscribing to continue...")
     with open(UNLOCK_FILE, "w") as f:
         f.write("unlocked")
@@ -64,8 +66,6 @@ def banner():
 """)
 
 # ---------- OSINT Functions ----------
-
-# IP Lookup using ip-api
 def ip_lookup():
     ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
     try:
@@ -73,21 +73,19 @@ def ip_lookup():
         print(Fore.GREEN + "\n[+] IP Lookup Results:\n")
         for k, v in r.items():
             print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
-    except Exception as e:
-        print(Fore.RED + "Error in IP Lookup:", e)
+    except:
+        print(Fore.RED + "Error in IP Lookup")
 
-# Domain/WHOIS Lookup
 def domain_lookup():
     domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
     try:
         w = whois.whois(domain)
-        print(Fore.GREEN + "\n[+] Domain WHOIS Results:\n")
+        print(Fore.GREEN + "\n[+] WHOIS Lookup Results:\n")
         for key, value in w.items():
             print(f"{Fore.YELLOW}{key:<15}: {Fore.WHITE}{value}")
-    except Exception as e:
-        print(Fore.RED + "Error in Domain Lookup:", e)
+    except:
+        print(Fore.RED + "Error in Domain/WHOIS Lookup")
 
-# HTTP Headers
 def headers_lookup():
     url = input(Fore.CYAN + "\n[?] Enter URL: ")
     try:
@@ -95,37 +93,33 @@ def headers_lookup():
         print(Fore.GREEN + "\n[+] HTTP Headers:\n")
         for k, v in r.headers.items():
             print(f"{Fore.YELLOW}{k:<20}: {Fore.WHITE}{v}")
-    except Exception as e:
-        print(Fore.RED + "Error in HTTP Headers Lookup:", e)
+    except:
+        print(Fore.RED + "Error in HTTP Headers Lookup")
 
-# Phone Lookup using Abstract free demo
 def phone_lookup():
+    from urllib.parse import quote
+    api_key = "f97bc3bedb2944e8b16c02d76680fd44"  # Abstract API free tier
     number = input(Fore.CYAN + "\n[?] Enter Phone Number (with country code): ")
     try:
-        encoded_number = number.replace("+","%2B")
-        r = requests.get(f"https://phonevalidation.abstractapi.com/v1/?api_key=f97bc3bedb2944e8b16c02d76680fd44&phone={encoded_number}")
-        data = r.json()
+        r = requests.get(f"https://phonevalidation.abstractapi.com/v1/?api_key={api_key}&phone={quote(number)}").json()
         print(Fore.GREEN + "\n[+] Phone Lookup Results:\n")
-        print(f"{Fore.YELLOW}Valid       : {Fore.WHITE}{data.get('valid')}")
-        print(f"{Fore.YELLOW}Country     : {Fore.WHITE}{data.get('country')}")
-        print(f"{Fore.YELLOW}Carrier     : {Fore.WHITE}{data.get('carrier')}")
-        print(f"{Fore.YELLOW}Line Type   : {Fore.WHITE}{data.get('line_type')}")
-    except Exception as e:
-        print(Fore.RED + "Error in Phone Lookup:", e)
+        print(F"{Fore.YELLOW}Carrier      : {Fore.WHITE}{r.get('carrier', 'N/A')}")
+        print(F"{Fore.YELLOW}Location     : {Fore.WHITE}{r.get('location', 'N/A')}")
+        print(F"{Fore.YELLOW}Line Type    : {Fore.WHITE}{r.get('line_type', 'N/A')}")
+    except:
+        print(Fore.RED + "Error in Phone Lookup")
 
-# Email Lookup using DNS MX check
 def email_lookup():
     email = input(Fore.CYAN + "\n[?] Enter Email: ")
     try:
         domain = email.split("@")[1]
-        mx_records = dns.resolver.resolve(domain, 'MX')
-        print(Fore.GREEN + f"\n[+] MX Records for {domain}:\n")
-        for r in mx_records:
-            print(f"{Fore.YELLOW}- {Fore.WHITE}{r.exchange}")
-    except Exception as e:
-        print(Fore.RED + "Error in Email Lookup:", e)
+        answers = dns.resolver.resolve(domain, 'MX')
+        print(Fore.GREEN + "\n[+] Email MX Records:\n")
+        for rdata in answers:
+            print(f"{Fore.YELLOW}- {Fore.WHITE}{rdata.exchange}")
+    except:
+        print(Fore.RED + "Error in Email Lookup")
 
-# Username lookup
 def username_lookup():
     username = input(Fore.CYAN + "\n[?] Enter Username: ")
     print(Fore.GREEN + f"\n[+] Searching for username '{username}' across platforms...\n")
@@ -133,58 +127,45 @@ def username_lookup():
     for site in platforms:
         print(f"{Fore.YELLOW}{site:<20}: {Fore.WHITE}https://{site}/{username}")
 
-# DNS Lookup
 def dns_lookup():
     domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
     try:
-        r = dns.resolver.resolve(domain, 'A')
-        print(Fore.GREEN + "\n[+] DNS A Records:\n")
-        for rec in r:
-            print(f"{Fore.YELLOW}- {Fore.WHITE}{rec}")
-    except Exception as e:
-        print(Fore.RED + "Error in DNS Lookup:", e)
+        answers = dns.resolver.resolve(domain, 'A')
+        print(Fore.GREEN + "\n[+] DNS Lookup Results:\n")
+        for rdata in answers:
+            print(f"{Fore.YELLOW}- {Fore.WHITE}{rdata}")
+    except:
+        print(Fore.RED + "Error in DNS Lookup")
 
-# WHOIS Lookup
-def whois_lookup_func():
-    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
-    try:
-        w = whois.whois(domain)
-        print(Fore.GREEN + "\n[+] WHOIS Results:\n")
-        for k, v in w.items():
-            print(f"{Fore.YELLOW}{k:<15}: {Fore.WHITE}{v}")
-    except Exception as e:
-        print(Fore.RED + "Error in WHOIS Lookup:", e)
-
-# Subdomain Scan (simple)
 def subdomain_scan():
     domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
-    subdomains = ["www", "mail", "ftp", "test", "dev"]
+    common_subs = ["www", "mail", "ftp", "ns1", "ns2"]
     print(Fore.GREEN + "\n[+] Subdomain Scan Results:\n")
-    for sub in subdomains:
-        print(f"{Fore.YELLOW}- {Fore.WHITE}http://{sub}.{domain}")
+    for sub in common_subs:
+        try:
+            ip = socket.gethostbyname(f"{sub}.{domain}")
+            print(f"{Fore.YELLOW}{sub:<10}: {Fore.WHITE}{ip}")
+        except:
+            pass
 
-# Reverse IP Lookup using ipwhois
 def reverse_ip():
     ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
     try:
         obj = IPWhois(ip)
         res = obj.lookup_rdap()
         print(Fore.GREEN + "\n[+] Reverse IP Results:\n")
-        print(f"{Fore.YELLOW}Network: {Fore.WHITE}{res['network']['name']}")
-        print(f"{Fore.YELLOW}Country: {Fore.WHITE}{res['network']['country']}")
-    except Exception as e:
-        print(Fore.RED + "Error in Reverse IP Lookup:", e)
+        for k, v in res.items():
+            print(f"{Fore.YELLOW}{k:<15}: {Fore.WHITE}{v}")
+    except:
+        print(Fore.RED + "Error in Reverse IP Lookup")
 
-# Traceroute (basic)
 def trace_route():
     host = input(Fore.CYAN + "\n[?] Enter Host/Domain: ")
     try:
-        print(Fore.GREEN + "\n[+] Traceroute Results:\n")
         os.system(f"traceroute {host}")
-    except Exception as e:
-        print(Fore.RED + "Error in Traceroute:", e)
+    except:
+        print(Fore.RED + "Error in Traceroute")
 
-# GeoIP Lookup using ipinfo.io
 def geoip_lookup():
     ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
     try:
@@ -192,21 +173,20 @@ def geoip_lookup():
         print(Fore.GREEN + "\n[+] GeoIP Information:\n")
         for k, v in r.items():
             print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
-    except Exception as e:
-        print(Fore.RED + "Error in GeoIP Lookup:", e)
+    except:
+        print(Fore.RED + "Error in GeoIP Lookup")
 
-# Port Scan using Hackertarget free API
 def port_scan():
     host = input(Fore.CYAN + "\n[?] Enter Host/IP: ")
     try:
         r = requests.get(f"https://api.hackertarget.com/nmap/?q={host}")
         print(Fore.GREEN + "\n[+] Port Scan Results:\n")
         print(Fore.WHITE + r.text)
-    except Exception as e:
-        print(Fore.RED + "Error in Port Scan:", e)
+    except:
+        print(Fore.RED + "Error in Port Scan")
 
 # ---------- Menu ----------
-def menu_options():
+def menu():
     banner()
     print(Fore.CYAN + Style.BRIGHT + """
 [1]  IP Lookup
@@ -229,8 +209,9 @@ def menu_options():
 def main():
     unlock()
     while True:
-        menu_options()
+        menu()
         choice = input(Fore.YELLOW + "[?] Select option: ")
+
         if choice == "1": ip_lookup()
         elif choice == "2": domain_lookup()
         elif choice == "3": headers_lookup()
@@ -238,7 +219,7 @@ def main():
         elif choice == "5": email_lookup()
         elif choice == "6": username_lookup()
         elif choice == "7": dns_lookup()
-        elif choice == "8": whois_lookup_func()
+        elif choice == "8": domain_lookup()
         elif choice == "9": subdomain_scan()
         elif choice == "10": reverse_ip()
         elif choice == "11": trace_route()
@@ -249,6 +230,7 @@ def main():
             sys.exit()
         else:
             print(Fore.RED + "Invalid Choice!")
+
         input(Fore.CYAN + "\nPress Enter to continue...")
 
 if __name__ == "__main__":
