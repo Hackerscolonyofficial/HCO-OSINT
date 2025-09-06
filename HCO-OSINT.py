@@ -21,36 +21,42 @@ Hackers Colony or Azhar will not be responsible for any misuse.
 import os
 import sys
 import time
-import socket
-import webbrowser
 import requests
+import webbrowser
 from colorama import Fore, Style, init
 import dns.resolver
-import whois
-from ipwhois import IPWhois
+from urllib.parse import urlparse
 
 # Initialize colorama
 init(autoreset=True)
+
+# Path to store device-wide unlock flag
 UNLOCK_FILE = os.path.expanduser("~/.hco_osint_unlock")
 
 # ---------- Unlock / YouTube Redirect ----------
 def unlock():
     if os.path.exists(UNLOCK_FILE):
-        return
+        return  # Already unlocked
+
     os.system("clear")
     print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════")
     print(Fore.RED + Style.BRIGHT + "       🔒 HCO-OSINT Tool Locked 🔒       ")
     print(Fore.CYAN + "You must subscribe to Hackers Colony Tech")
     print(Fore.CYAN + "and click the bell 🔔 to unlock the tool.")
     print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════\n")
+
     # Countdown
     for i in range(8, 0, -1):
-        print(Fore.YELLOW + Style.BRIGHT + f"Redirecting to YouTube in {i} seconds...", end="\r")
+        print(Fore.YELLOW + f"Redirecting to YouTube in {i} seconds...", end="\r")
         time.sleep(1)
+
     # Open YouTube channel
     youtube_link = "https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya"
     webbrowser.open(youtube_link)
+
     input(Fore.GREEN + "\nPress Enter after subscribing to continue...")
+
+    # Create unlock file
     with open(UNLOCK_FILE, "w") as f:
         f.write("unlocked")
 
@@ -77,16 +83,20 @@ def ip_lookup():
 
 def domain_lookup():
     domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
+    if not domain.startswith("http"):
+        domain = "http://" + domain
+    parsed = urlparse(domain).netloc
     try:
-        w = whois.whois(domain)
-        print(Fore.GREEN + "\n[+] Domain/WHOIS Lookup Results:\n")
-        for key, value in w.items():
-            print(f"{Fore.YELLOW}{key:<15}: {Fore.WHITE}{value}")
+        r = requests.get(f"https://api.hackertarget.com/whois/?q={parsed}")
+        print(Fore.GREEN + "\n[+] Domain Lookup Results:\n")
+        print(Fore.WHITE + r.text)
     except:
-        print(Fore.RED + "Error in Domain/WHOIS Lookup")
+        print(Fore.RED + "Error in Domain Lookup")
 
 def headers_lookup():
     url = input(Fore.CYAN + "\n[?] Enter URL: ")
+    if not url.startswith("http"):
+        url = "http://" + url
     try:
         r = requests.get(url)
         print(Fore.GREEN + "\n[+] HTTP Headers:\n")
@@ -97,28 +107,26 @@ def headers_lookup():
 
 def phone_lookup():
     number = input(Fore.CYAN + "\n[?] Enter Phone Number (with country code): ")
-    try:
-        if number.startswith('+'):
-            country = number[1:4]
-            print(Fore.GREEN + "\n[+] Phone Lookup Results:\n")
-            print(f"{Fore.YELLOW}Country Code : {Fore.WHITE}{country}")
-            print(f"{Fore.YELLOW}Carrier      : {Fore.WHITE}N/A")
-            print(f"{Fore.YELLOW}Line Type    : {Fore.WHITE}N/A")
-        else:
-            print(Fore.RED + "Invalid number format. Include country code e.g. +918340246110")
-    except:
-        print(Fore.RED + "Error in Phone Lookup")
+    country_code = ''.join(filter(str.isdigit, number.split('+')[-1][:3]))
+    print(Fore.GREEN + "\n[+] Phone Lookup Results:\n")
+    print(Fore.YELLOW + "Country Code : " + Fore.WHITE + (country_code if country_code else "N/A"))
+    print(Fore.YELLOW + "Carrier      : " + Fore.WHITE + "N/A")
+    print(Fore.YELLOW + "Line Type    : " + Fore.WHITE + "N/A")
 
 def email_lookup():
     email = input(Fore.CYAN + "\n[?] Enter Email: ")
+    domain = email.split("@")[-1]
+    print(Fore.GREEN + "\n[+] Email Lookup Results:\n")
     try:
-        domain = email.split("@")[1]
         answers = dns.resolver.resolve(domain, 'MX')
-        print(Fore.GREEN + "\n[+] Email MX Records:\n")
         for rdata in answers:
             print(f"{Fore.YELLOW}- {Fore.WHITE}{rdata.exchange}")
-    except:
-        print(Fore.RED + "Error in Email Lookup")
+    except dns.resolver.NoAnswer:
+        print(Fore.YELLOW + "No MX record found for this domain.")
+    except dns.resolver.NXDOMAIN:
+        print(Fore.RED + "Domain does not exist.")
+    except Exception as e:
+        print(Fore.RED + f"Error in Email Lookup: {e}")
 
 def username_lookup():
     username = input(Fore.CYAN + "\n[?] Enter Username: ")
@@ -130,38 +138,45 @@ def username_lookup():
 def dns_lookup():
     domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
     try:
-        answers = dns.resolver.resolve(domain, 'A')
+        r = requests.get(f"https://api.hackertarget.com/dnslookup/?q={domain}")
         print(Fore.GREEN + "\n[+] DNS Lookup Results:\n")
-        for rdata in answers:
-            print(f"{Fore.YELLOW}- {Fore.WHITE}{rdata}")
+        print(Fore.WHITE + r.text)
     except:
         print(Fore.RED + "Error in DNS Lookup")
 
+def whois_lookup():
+    domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
+    try:
+        r = requests.get(f"https://api.hackertarget.com/whois/?q={domain}")
+        print(Fore.GREEN + "\n[+] WHOIS Lookup Results:\n")
+        print(Fore.WHITE + r.text)
+    except:
+        print(Fore.RED + "Error in WHOIS Lookup")
+
 def subdomain_scan():
     domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
-    common_subs = ["www", "mail", "ftp", "ns1", "ns2"]
-    print(Fore.GREEN + "\n[+] Subdomain Scan Results:\n")
-    for sub in common_subs:
-        try:
-            ip = socket.gethostbyname(f"{sub}.{domain}")
-            print(f"{Fore.YELLOW}{sub:<10}: {Fore.WHITE}{ip}")
-        except:
-            pass
+    try:
+        r = requests.get(f"https://api.hackertarget.com/hostsearch/?q={domain}")
+        print(Fore.GREEN + "\n[+] Subdomain Scan Results:\n")
+        print(Fore.WHITE + r.text)
+    except:
+        print(Fore.RED + "Error in Subdomain Scan")
 
 def reverse_ip():
     ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
     try:
-        obj = IPWhois(ip)
-        res = obj.lookup_rdap()
+        r = requests.get(f"https://api.hackertarget.com/reverseiplookup/?q={ip}")
         print(Fore.GREEN + "\n[+] Reverse IP Results:\n")
-        print(f"{Fore.WHITE}{res.get('network', res)}")
+        print(Fore.WHITE + r.text)
     except:
         print(Fore.RED + "Error in Reverse IP Lookup")
 
 def trace_route():
     host = input(Fore.CYAN + "\n[?] Enter Host/Domain: ")
     try:
-        os.system(f"traceroute {host}")
+        r = requests.get(f"https://api.hackertarget.com/mtr/?q={host}")
+        print(Fore.GREEN + "\n[+] Traceroute:\n")
+        print(Fore.WHITE + r.text)
     except:
         print(Fore.RED + "Error in Traceroute")
 
@@ -178,17 +193,9 @@ def geoip_lookup():
 def port_scan():
     host = input(Fore.CYAN + "\n[?] Enter Host/IP: ")
     try:
-        print(Fore.GREEN + "\n[+] Scanning common ports...\n")
-        common_ports = [21,22,23,25,53,80,110,443,445,3389]
-        for port in common_ports:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(0.5)
-            result = sock.connect_ex((host, port))
-            if result == 0:
-                print(f"{Fore.YELLOW}Port {port:<5}: {Fore.WHITE}Open")
-            else:
-                print(f"{Fore.YELLOW}Port {port:<5}: {Fore.WHITE}Closed")
-            sock.close()
+        r = requests.get(f"https://api.hackertarget.com/nmap/?q={host}")
+        print(Fore.GREEN + "\n[+] Port Scan Results:\n")
+        print(Fore.WHITE + r.text)
     except:
         print(Fore.RED + "Error in Port Scan")
 
@@ -214,10 +221,11 @@ def menu():
 
 # ---------- Main ----------
 def main():
-    unlock()
+    unlock()  # Run unlock first
     while True:
         menu()
         choice = input(Fore.YELLOW + "[?] Select option: ")
+
         if choice == "1": ip_lookup()
         elif choice == "2": domain_lookup()
         elif choice == "3": headers_lookup()
@@ -225,7 +233,7 @@ def main():
         elif choice == "5": email_lookup()
         elif choice == "6": username_lookup()
         elif choice == "7": dns_lookup()
-        elif choice == "8": domain_lookup()  # WHOIS same as domain
+        elif choice == "8": whois_lookup()
         elif choice == "9": subdomain_scan()
         elif choice == "10": reverse_ip()
         elif choice == "11": trace_route()
@@ -236,6 +244,7 @@ def main():
             sys.exit()
         else:
             print(Fore.RED + "Invalid Choice!")
+
         input(Fore.CYAN + "\nPress Enter to continue...")
 
 if __name__ == "__main__":
