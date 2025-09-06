@@ -113,17 +113,17 @@ def ip_lookup():
         r1 = requests.get(f"http://ip-api.com/json/{ip}", timeout=10).json()
         if r1.get('status') == 'success':
             print(Fore.GREEN + "\n[+] IP Lookup Results (ip-api.com):\n")
-            print(f"{Fore.YELLOW}IP:<15}: {Fore.WHITE}{r1.get('query', 'N/A')}")
-            print(f"{Fore.YELLOW}Country:<15}: {Fore.WHITE}{r1.get('country', 'N/A')}")
-            print(f"{Fore.YELLOW}Region:<15}: {Fore.WHITE}{r1.get('regionName', 'N/A')}")
-            print(f"{Fore.YELLOW}City:<15}: {Fore.WHITE}{r1.get('city', 'N/A')}")
-            print(f"{Fore.YELLOW}ISP:<15}: {Fore.WHITE}{r1.get('isp', 'N/A')}")
-            print(f"{Fore.YELLOW}Organization:<15}: {Fore.WHITE}{r1.get('org', 'N/A')}")
-            print(f"{Fore.YELLOW}ASN:<15}: {Fore.WHITE}{r1.get('as', 'N/A')}")
-            print(f"{Fore.YELLOW}Latitude:<15}: {Fore.WHITE}{r1.get('lat', 'N/A')}")
-            print(f"{Fore.YELLOW}Longitude:<15}: {Fore.WHITE}{r1.get('lon', 'N/A')}")
-            print(f"{Fore.YELLOW}Timezone:<15}: {Fore.WHITE}{r1.get('timezone', 'N/A')}")
-            print(f"{Fore.YELLOW}ZIP:<15}: {Fore.WHITE}{r1.get('zip', 'N/A')}")
+            print(f"{Fore.YELLOW}IP:{' ':12}{Fore.WHITE}{r1.get('query', 'N/A')}")
+            print(f"{Fore.YELLOW}Country:{' ':8}{Fore.WHITE}{r1.get('country', 'N/A')}")
+            print(f"{Fore.YELLOW}Region:{' ':9}{Fore.WHITE}{r1.get('regionName', 'N/A')}")
+            print(f"{Fore.YELLOW}City:{' ':11}{Fore.WHITE}{r1.get('city', 'N/A')}")
+            print(f"{Fore.YELLOW}ISP:{' ':12}{Fore.WHITE}{r1.get('isp', 'N/A')}")
+            print(f"{Fore.YELLOW}Organization:{' ':4}{Fore.WHITE}{r1.get('org', 'N/A')}")
+            print(f"{Fore.YELLOW}ASN:{' ':12}{Fore.WHITE}{r1.get('as', 'N/A')}")
+            print(f"{Fore.YELLOW}Latitude:{' ':8}{Fore.WHITE}{r1.get('lat', 'N/A')}")
+            print(f"{Fore.YELLOW}Longitude:{' ':7}{Fore.WHITE}{r1.get('lon', 'N/A')}")
+            print(f"{Fore.YELLOW}Timezone:{' ':8}{Fore.WHITE}{r1.get('timezone', 'N/A')}")
+            print(f"{Fore.YELLOW}ZIP:{' ':12}{Fore.WHITE}{r1.get('zip', 'N/A')}")
         else:
             print(Fore.RED + "[-] ip-api.com lookup failed")
             
@@ -132,11 +132,11 @@ def ip_lookup():
             r2 = requests.get(f"https://ipinfo.io/{ip}/json", timeout=10).json()
             print(Fore.GREEN + "\n[+] Additional Information (ipinfo.io):\n")
             if 'hostname' in r2:
-                print(f"{Fore.YELLOW}Hostname:<15}: {Fore.WHITE}{r2.get('hostname', 'N/A')}")
+                print(f"{Fore.YELLOW}Hostname:{' ':8}{Fore.WHITE}{r2.get('hostname', 'N/A')}")
             if 'anycast' in r2:
-                print(f"{Fore.YELLOW}Anycast:<15}: {Fore.WHITE}{r2.get('anycast', 'N/A')}")
+                print(f"{Fore.YELLOW}Anycast:{' ':9}{Fore.WHITE}{r2.get('anycast', 'N/A')}")
             if 'company' in r2:
-                print(f"{Fore.YELLOW}Company:<15}: {Fore.WHITE}{r2.get('company', {}).get('name', 'N/A')}")
+                print(f"{Fore.YELLOW}Company:{' ':9}{Fore.WHITE}{r2.get('company', {}).get('name', 'N/A')}")
         except:
             print(Fore.RED + "[-] ipinfo.io lookup failed")
             
@@ -169,17 +169,17 @@ def domain_lookup():
             print(Fore.GREEN + "\n[+] Domain Lookup Results:\n")
             
             if 'create_date' in data:
-                print(f"{Fore.YELLOW}Created:<15}: {Fore.WHITE}{data.get('create_date', 'N/A')}")
+                print(f"{Fore.YELLOW}Created:{' ':9}{Fore.WHITE}{data.get('create_date', 'N/A')}")
             if 'update_date' in data:
-                print(f"{Fore.YELLOW}Updated:<15}: {Fore.WHITE}{data.get('update_date', 'N/A')}")
+                print(f"{Fore.YELLOW}Updated:{' ':9}{Fore.WHITE}{data.get('update_date', 'N/A')}")
             if 'expire_date' in data:
-                print(f"{Fore.YELLOW}Expires:<15}: {Fore.WHITE}{data.get('expire_date', 'N/A')}")
+                print(f"{Fore.YELLOW}Expires:{' ':9}{Fore.WHITE}{data.get('expire_date', 'N/A')}")
             if 'registrar' in data:
-                print(f"{Fore.YELLOW}Registrar:<15}: {Fore.WHITE}{data.get('registrar', 'N/A')}")
+                print(f"{Fore.YELLOW}Registrar:{' ':7}{Fore.WHITE}{data.get('registrar', 'N/A')}")
             if 'registrant_organization' in data:
-                print(f"{Fore.YELLOW}Organization:<15}: {Fore.WHITE}{data.get('registrant_organization', 'N/A')}")
+                print(f"{Fore.YELLOW}Organization:{' ':4}{Fore.WHITE}{data.get('registrant_organization', 'N/A')}")
             if 'registrant_country' in data:
-                print(f"{Fore.YELLOW}Country:<15}: {Fore.WHITE}{data.get('registrant_country', 'N/A')}")
+                print(f"{Fore.YELLOW}Country:{' ':8}{Fore.WHITE}{data.get('registrant_country', 'N/A')}")
                 
         else:
             print(Fore.RED + "[-] WHOIS lookup failed, trying alternative...")
@@ -424,21 +424,21 @@ def whois_lookup():
             print(Fore.GREEN + "\n[+] WHOIS Lookup Results:\n")
             
             if w.domain_name:
-                print(f"{Fore.YELLOW}Domain Name:<20}: {Fore.WHITE}{w.domain_name}")
+                print(f"{Fore.YELLOW}Domain Name:{' ':6}{Fore.WHITE}{w.domain_name}")
             if w.registrar:
-                print(f"{Fore.YELLOW}Registrar:<20}: {Fore.WHITE}{w.registrar}")
+                print(f"{Fore.YELLOW}Registrar:{' ':8}{Fore.WHITE}{w.registrar}")
             if w.creation_date:
-                print(f"{Fore.YELLOW}Creation Date:<20}: {Fore.WHITE}{w.creation_date}")
+                print(f"{Fore.YELLOW}Creation Date:{' ':4}{Fore.WHITE}{w.creation_date}")
             if w.expiration_date:
-                print(f"{Fore.YELLOW}Expiration Date:<20}: {Fore.WHITE}{w.expiration_date}")
+                print(f"{Fore.YELLOW}Expiration Date:{' ':2}{Fore.WHITE}{w.expiration_date}")
             if w.updated_date:
-                print(f"{Fore.YELLOW}Updated Date:<20}: {Fore.WHITE}{w.updated_date}")
+                print(f"{Fore.YELLOW}Updated Date:{' ':5}{Fore.WHITE}{w.updated_date}")
             if w.name_servers:
-                print(f"{Fore.YELLOW}Name Servers:<20}: {Fore.WHITE}{', '.join(w.name_servers)}")
+                print(f"{Fore.YELLOW}Name Servers:{' ':5}{Fore.WHITE}{', '.join(w.name_servers)}")
             if w.status:
-                print(f"{Fore.YELLOW}Status:<20}: {Fore.WHITE}{', '.join(w.status)}")
+                print(f"{Fore.YELLOW}Status:{' ':10}{Fore.WHITE}{', '.join(w.status)}")
             if w.emails:
-                print(f"{Fore.YELLOW}Emails:<20}: {Fore.WHITE}{', '.join(w.emails)}")
+                print(f"{Fore.YELLOW}Emails:{' ':10}{Fore.WHITE}{', '.join(w.emails)}")
                 
         except ImportError:
             # Fallback to API
@@ -580,19 +580,19 @@ def geoip_lookup():
             data = r.json()
             print(Fore.GREEN + "\n[+] GeoIP Information:\n")
             
-            print(f"{Fore.YELLOW}IP:<15}: {Fore.WHITE}{data.get('ip', 'N/A')}")
-            print(f"{Fore.YELLOW}City:<15}: {Fore.WHITE}{data.get('city', 'N/A')}")
-            print(f"{Fore.YELLOW}Region:<15}: {Fore.WHITE}{data.get('region', 'N/A')}")
-            print(f"{Fore.YELLOW}Country:<15}: {Fore.WHITE}{data.get('country_name', 'N/A')}")
-            print(f"{Fore.YELLOW}Country Code:<15}: {Fore.WHITE}{data.get('country_code', 'N/A')}")
-            print(f"{Fore.YELLOW}Postal Code:<15}: {Fore.WHITE}{data.get('postal', 'N/A')}")
-            print(f"{Fore.YELLOW}Latitude:<15}: {Fore.WHITE}{data.get('latitude', 'N/A')}")
-            print(f"{Fore.YELLOW}Longitude:<15}: {Fore.WHITE}{data.get('longitude', 'N/A')}")
-            print(f"{Fore.YELLOW}Timezone:<15}: {Fore.WHITE}{data.get('timezone', 'N/A')}")
-            print(f"{Fore.YELLOW}Currency:<15}: {Fore.WHITE}{data.get('currency', 'N/A')}")
-            print(f"{Fore.YELLOW}Languages:<15}: {Fore.WHITE}{data.get('languages', 'N/A')}")
-            print(f"{Fore.YELLOW}ASN:<15}: {Fore.WHITE}{data.get('asn', 'N/A')}")
-            print(f"{Fore.YELLOW}Organization:<15}: {Fore.WHITE}{data.get('org', 'N/A')}")
+            print(f"{Fore.YELLOW}IP:{' ':15}{Fore.WHITE}{data.get('ip', 'N/A')}")
+            print(f"{Fore.YELLOW}City:{' ':14}{Fore.WHITE}{data.get('city', 'N/A')}")
+            print(f"{Fore.YELLOW}Region:{' ':12}{Fore.WHITE}{data.get('region', 'N/A')}")
+            print(f"{Fore.YELLOW}Country:{' ':11}{Fore.WHITE}{data.get('country_name', 'N/A')}")
+            print(f"{Fore.YELLOW}Country Code:{' ':6}{Fore.WHITE}{data.get('country_code', 'N/A')}")
+            print(f"{Fore.YELLOW}Postal Code:{' ':8}{Fore.WHITE}{data.get('postal', 'N/A')}")
+            print(f"{Fore.YELLOW}Latitude:{' ':10}{Fore.WHITE}{data.get('latitude', 'N/A')}")
+            print(f"{Fore.YELLOW}Longitude:{' ':9}{Fore.WHITE}{data.get('longitude', 'N/A')}")
+            print(f"{Fore.YELLOW}Timezone:{' ':10}{Fore.WHITE}{data.get('timezone', 'N/A')}")
+            print(f"{Fore.YELLOW}Currency:{' ':10}{Fore.WHITE}{data.get('currency', 'N/A')}")
+            print(f"{Fore.YELLOW}Languages:{' ':9}{Fore.WHITE}{data.get('languages', 'N/A')}")
+            print(f"{Fore.YELLOW}ASN:{' ':15}{Fore.WHITE}{data.get('asn', 'N/A')}")
+            print(f"{Fore.YELLOW}Organization:{' ':6}{Fore.WHITE}{data.get('org', 'N/A')}")
             
         else:
             print(Fore.RED + "[-] GeoIP lookup failed")
