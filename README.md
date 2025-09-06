@@ -1,4 +1,4 @@
-# 🚀🔍 HCO-OSINT - Advanced OSINT Tool 🔍🚀
+# 🚀🔍 HCO-OSINT - Advanced OSINT Tool by Azhar🔍🚀
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -7,7 +7,7 @@
 
 ---
 
-## 📺 YouTube & Community
+## 📺 Community & Socials  
 👉 Subscribe on YouTube: [Hackers Colony Tech](https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya)  
 👉 Join us on Telegram: [Hackers Colony](https://t.me/hackersColony)  
 👉 Follow on Instagram: [@hackers_colony_official](https://www.instagram.com/hackers_colony_official)  
@@ -16,18 +16,23 @@
 ---
 
 ## ⚡ About
-**HCO-OSINT** is a powerful Open Source Intelligence tool created by **Azhar (Hackers Colony)**.  
-It allows ethical hackers, researchers, and students to collect advanced information such as:
+**HCO-OSINT** is a professional **Open Source Intelligence Tool** created by **Azhar (Hackers Colony)**.  
+It helps ethical hackers, researchers, and students collect **in-depth information** from multiple free OSINT sources.
 
-- ✅ IP Address Information  
-- ✅ Domain & WHOIS Lookup  
-- ✅ Reverse IP Lookup  
-- ✅ GeoIP Data  
-- ✅ Traceroute  
-- ✅ Open Ports  
-- ✅ Subdomains & DNS Info  
+### ✅ Features
+- 🌍 IP Lookup (location, ISP, region, etc.)  
+- 🌐 Domain Lookup & WHOIS info  
+- 🔎 DNS & Subdomain enumeration  
+- 🛰️ GeoIP Information  
+- 🔄 Reverse IP Lookup  
+- 📡 HTTP Headers inspection  
+- 📞 Phone Number lookup (basic free sources)  
+- 📧 Email lookup (basic free sources)  
+- 👤 Username lookup  
+- 🔍 Traceroute  
+- 🚪 Open Ports Scanner  
 
-All inside **Termux / Linux terminal** with a professional interface.  
+All inside **Termux/Linux terminal** with colorful interface.
 
 ---
 
@@ -69,4 +74,4 @@ Use responsibly and **stay ethical**.
 👨‍💻 Code by **Azhar (Hackers Colony)**  
 💡 Inspired by the global OSINT community  
 
-> 🕶️ "Hackers don’t destroy systems, they build knowledge."
+> 🕶️ *"Hackers don’t destroy systems, they build knowledge."*
