@@ -25,15 +25,9 @@ import time
 import requests
 import webbrowser
 from colorama import Fore, Style, init
+import urllib.parse
 
 init(autoreset=True)
-
-# ---------------- API KEYS ----------------
-SHODAN_API_KEY = "iph718pM0AvRkryYhYDWSXdEgcoa"
-IPINFO_API_KEY = "d28f2d86535f4a"
-WHOISXML_API_KEY = "at_yOcz6VLB6VJyKuDaAUDrI3F3fOi86"
-ABSTRACT_API_KEY = "f97bc3bedb2944e8b16c02d76680fd44"
-
 UNLOCK_FILE = os.path.expanduser("~/.hco_osint_unlock")
 
 # ---------- Unlock / YouTube Redirect ----------
@@ -68,7 +62,7 @@ def banner():
 def ip_lookup():
     ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
     try:
-        r = requests.get(f"https://ipinfo.io/{ip}?token={IPINFO_API_KEY}").json()
+        r = requests.get(f"http://ip-api.com/json/{ip}").json()
         print(Fore.GREEN + "\n[+] IP Lookup Results:\n")
         for k, v in r.items():
             print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
@@ -96,26 +90,16 @@ def headers_lookup():
 
 def phone_lookup():
     number = input(Fore.CYAN + "\n[?] Enter Phone Number (with country code): ")
-    try:
-        r = requests.get(f"https://abstractapi.com/v1/phone/validate/?api_key={ABSTRACT_API_KEY}&phone={number}").json()
-        print(Fore.GREEN + "\n[+] Phone Lookup Results:\n")
-        print(f"{Fore.YELLOW}Valid       : {Fore.WHITE}{r['valid']}")
-        print(f"{Fore.YELLOW}Country     : {Fore.WHITE}{r['country']}")
-        print(f"{Fore.YELLOW}Carrier     : {Fore.WHITE}{r['carrier']}")
-        print(f"{Fore.YELLOW}Line Type   : {Fore.WHITE}{r['line_type']}")
-    except:
-        print(Fore.RED + "Error in Phone Lookup")
+    print(Fore.GREEN + "\n[+] Phone Lookup Results (Demo Only):\n")
+    print(Fore.YELLOW + "Carrier      : " + Fore.WHITE + "Not available (demo only)")
+    print(Fore.YELLOW + "Location     : " + Fore.WHITE + "Not available (demo only)")
+    print(Fore.YELLOW + "Line Type    : " + Fore.WHITE + "Not available (demo only)")
 
 def email_lookup():
     email = input(Fore.CYAN + "\n[?] Enter Email: ")
-    try:
-        r = requests.get(f"https://abstractapi.com/v1/email/validate/?api_key={ABSTRACT_API_KEY}&email={email}").json()
-        print(Fore.GREEN + "\n[+] Email Lookup Results:\n")
-        print(f"{Fore.YELLOW}Valid       : {Fore.WHITE}{r['deliverability']}")
-        print(f"{Fore.YELLOW}Domain      : {Fore.WHITE}{r['domain']}")
-        print(f"{Fore.YELLOW}Is Free     : {Fore.WHITE}{r['is_free_email']}")
-    except:
-        print(Fore.RED + "Error in Email Lookup")
+    print(Fore.GREEN + "\n[+] Email Lookup Results (Demo Only):\n")
+    print(Fore.YELLOW + "Domain MX    : " + Fore.WHITE + "Check DNS manually")
+    print(Fore.YELLOW + "Leak Check   : " + Fore.WHITE + "Manual OSINT required")
 
 def username_lookup():
     username = input(Fore.CYAN + "\n[?] Enter Username: ")
@@ -136,9 +120,9 @@ def dns_lookup():
 def whois_lookup():
     domain = input(Fore.CYAN + "\n[?] Enter Domain: ")
     try:
-        r = requests.get(f"https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey={WHOISXML_API_KEY}&domainName={domain}&outputFormat=JSON").json()
+        r = requests.get(f"https://api.hackertarget.com/whois/?q={domain}")
         print(Fore.GREEN + "\n[+] WHOIS Lookup Results:\n")
-        print(Fore.WHITE + r)
+        print(Fore.WHITE + r.text)
     except:
         print(Fore.RED + "Error in WHOIS Lookup")
 
@@ -172,7 +156,7 @@ def trace_route():
 def geoip_lookup():
     ip = input(Fore.CYAN + "\n[?] Enter IP Address: ")
     try:
-        r = requests.get(f"https://ipinfo.io/{ip}?token={IPINFO_API_KEY}").json()
+        r = requests.get(f"https://ipinfo.io/{ip}/json").json()
         print(Fore.GREEN + "\n[+] GeoIP Information:\n")
         for k, v in r.items():
             print(f"{Fore.YELLOW}{k.title():<15}: {Fore.WHITE}{v}")
