@@ -15,7 +15,12 @@ This tool is made for **educational and research purposes only**.
 Hackers Colony or Azhar will not be responsible for any misuse.  
 
 ✨ Code by Azhar (Hackers Colony)
-══════════════════════════════════════════════════════
+
+Requirements:
+colorama
+requests
+dnspython
+phonenumbers
 """
 
 import os
@@ -25,18 +30,20 @@ import requests
 import webbrowser
 from colorama import Fore, Style, init
 import dns.resolver
+import phonenumbers
+from phonenumbers import geocoder, carrier, timezone
 from urllib.parse import urlparse
 
 # Initialize colorama
 init(autoreset=True)
 
-# Path to store device-wide unlock flag
+# Path to store unlock flag
 UNLOCK_FILE = os.path.expanduser("~/.hco_osint_unlock")
 
 # ---------- Unlock / YouTube Redirect ----------
 def unlock():
     if os.path.exists(UNLOCK_FILE):
-        return  # Already unlocked
+        return
 
     os.system("clear")
     print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════")
@@ -45,18 +52,16 @@ def unlock():
     print(Fore.CYAN + "and click the bell 🔔 to unlock the tool.")
     print(Fore.RED + Style.BRIGHT + "══════════════════════════════════════\n")
 
-    # Countdown
     for i in range(8, 0, -1):
         print(Fore.YELLOW + f"Redirecting to YouTube in {i} seconds...", end="\r")
         time.sleep(1)
 
-    # Open YouTube channel
-    youtube_link = "https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya"
-    webbrowser.open(youtube_link)
+    try:
+        os.system("termux-open-url 'https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya'")
+    except:
+        webbrowser.open("https://youtube.com/@hackers_colony_tech?si=pvdCWZggTIuGb0ya")
 
     input(Fore.GREEN + "\nPress Enter after subscribing to continue...")
-
-    # Create unlock file
     with open(UNLOCK_FILE, "w") as f:
         f.write("unlocked")
 
@@ -107,11 +112,15 @@ def headers_lookup():
 
 def phone_lookup():
     number = input(Fore.CYAN + "\n[?] Enter Phone Number (with country code): ")
-    country_code = ''.join(filter(str.isdigit, number.split('+')[-1][:3]))
-    print(Fore.GREEN + "\n[+] Phone Lookup Results:\n")
-    print(Fore.YELLOW + "Country Code : " + Fore.WHITE + (country_code if country_code else "N/A"))
-    print(Fore.YELLOW + "Carrier      : " + Fore.WHITE + "N/A")
-    print(Fore.YELLOW + "Line Type    : " + Fore.WHITE + "N/A")
+    try:
+        pn = phonenumbers.parse(number)
+        print(Fore.GREEN + "\n[+] Phone Lookup Results:\n")
+        print(Fore.YELLOW + "Country      : " + Fore.WHITE + str(geocoder.description_for_number(pn, "en")))
+        print(Fore.YELLOW + "Carrier      : " + Fore.WHITE + str(carrier.name_for_number(pn, "en")))
+        print(Fore.YELLOW + "Time Zones   : " + Fore.WHITE + str(timezone.time_zones_for_number(pn)))
+        print(Fore.YELLOW + "Line Type    : " + Fore.WHITE + str(phonenumbers.number_type(pn)))
+    except:
+        print(Fore.RED + "Error in Phone Lookup")
 
 def email_lookup():
     email = input(Fore.CYAN + "\n[?] Enter Email: ")
@@ -221,7 +230,7 @@ def menu():
 
 # ---------- Main ----------
 def main():
-    unlock()  # Run unlock first
+    unlock()
     while True:
         menu()
         choice = input(Fore.YELLOW + "[?] Select option: ")
