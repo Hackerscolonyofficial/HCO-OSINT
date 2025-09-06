@@ -1,4 +1,5 @@
 colorama
 requests
 phonenumbers
-validators
+python-whois
+haveibeenpwned
