@@ -1,5 +1,6 @@
 colorama
 requests
+dnspython
 phonenumbers
 python-whois
-haveibeenpwned
+tabulate
